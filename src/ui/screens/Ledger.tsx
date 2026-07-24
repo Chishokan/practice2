@@ -1,0 +1,42 @@
+import { useGameStore } from '../../store/gameStore';
+import { getBook } from '../../content/books';
+import { getVisitor } from '../../content/visitors';
+
+// 貸出台帳。過去の貸出を淡々と並べるだけ。
+// 綻びで一行が書き換わっても、ここは何の注記もせず静かに表示する（仕様）。
+export default function Ledger() {
+  const ledger = useGameStore((s) => s.world.ledger);
+  const goTo = useGameStore((s) => s.goTo);
+
+  return (
+    <section className="flex flex-col gap-4 w-full max-w-xl px-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl text-neutral-300">貸出台帳</h1>
+        <button
+          type="button"
+          onClick={() => goTo('reception')}
+          className="border border-neutral-700 px-3 py-1 text-sm text-neutral-400"
+        >
+          閉じる
+        </button>
+      </div>
+
+      {ledger.length === 0 ? (
+        <p className="text-neutral-500">まだ記録はありません。</p>
+      ) : (
+        <ul className="flex flex-col divide-y divide-neutral-800">
+          {ledger.map((entry) => (
+            <li key={entry.id} className="flex justify-between gap-4 py-2">
+              <span className="text-neutral-400">
+                {getVisitor(entry.visitorId)?.displayName ?? entry.visitorId}
+              </span>
+              <span className="text-neutral-200">
+                {getBook(entry.bookId)?.title ?? entry.bookId}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}

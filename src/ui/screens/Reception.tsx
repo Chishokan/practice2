@@ -6,6 +6,7 @@ import SceneView from '../components/SceneView';
 export default function Reception() {
   const visitorIndex = useGameStore((s) => s.visitorIndex);
   const pendingScenes = useGameStore((s) => s.pendingScenes);
+  const townText = useGameStore((s) => s.world.townText);
   const goTo = useGameStore((s) => s.goTo);
   const refuseCurrent = useGameStore((s) => s.refuseCurrent);
   const proceed = useGameStore((s) => s.proceed);
@@ -17,7 +18,21 @@ export default function Reception() {
 
   return (
     <section className="flex flex-col gap-6 w-full max-w-xl px-6">
-      <h1 className="text-xl text-neutral-300">{visitor.displayName}</h1>
+      {/* 窓辺の街。綻びが進むと、この描写が静かに簡素化されていく */}
+      <p className="text-sm text-neutral-500 border-l border-neutral-700 pl-3">
+        {townText}
+      </p>
+
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl text-neutral-300">{visitor.displayName}</h1>
+        <button
+          type="button"
+          onClick={() => goTo('ledger')}
+          className="text-sm text-neutral-500 underline underline-offset-4"
+        >
+          台帳
+        </button>
+      </div>
 
       <SceneView scenes={showingReaction ? pendingScenes : visitor.scenes} />
 

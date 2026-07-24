@@ -3,8 +3,10 @@ import type { BookId, Scene, WorldState } from '../domain/types';
 import { createInitialWorldState } from '../domain/worldState';
 import { addToShelf, isShelfOverCapacity, removeFromShelf } from '../domain/shelf';
 import { handOver, selectReaction } from '../domain/visitor';
+import { evaluateAnomalies } from '../domain/anomaly';
 import { allBooks } from '../content/books';
 import { allVisitors, getVisitor } from '../content/visitors';
+import { anomalyRules, TOWN_STAGES } from '../content/anomalies';
 
 // Zustand は domain/ の純粋関数を呼ぶだけの薄い層に留める。
 // 分岐やルールの本体は domain 側に置く。
@@ -50,7 +52,11 @@ function currentVisitorId(index: number): string | undefined {
 
 export const useGameStore = create<GameStore>((set, get) => ({
   screen: 'reception',
-  world: createInitialWorldState({ shelf: INITIAL_SHELF, shelfCapacity: SHELF_CAPACITY }),
+  world: createInitialWorldState({
+    shelf: INITIAL_SHELF,
+    shelfCapacity: SHELF_CAPACITY,
+    townText: TOWN_STAGES[0],
+  }),
   visitorIndex: 0,
   donationIndex: 0,
   pendingScenes: null,
@@ -104,7 +110,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   lowerFromShelf: (bookId) => {
     const { world, donationIndex, visitorIndex } = get();
-    const nextWorld = removeFromShelf(world, bookId);
+    // 降ろした直後に綻びを評価する（整理実行時に評価するのが設計）。
+    // ここで台帳の書き換えなどが静かに起こる。UI へは何も通知しない。
+    const nextWorld = evaluateAnomalies(removeFromShelf(world, bookId), anomalyRules);
     // まだ超過しているなら整理を続ける。解消したら次の来訪者へ。
     if (isShelfOverCapacity(nextWorld)) {
       set({ world: nextWorld });

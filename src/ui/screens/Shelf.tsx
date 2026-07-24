@@ -6,19 +6,23 @@ import BookList from '../components/BookList';
 // 書架。蔵書を検索し、現在の来訪者に手渡す本を選ぶ。
 export default function Shelf() {
   const shelf = useGameStore((s) => s.world.shelf);
+  const searchBlocked = useGameStore((s) => s.world.searchBlocked);
   const goTo = useGameStore((s) => s.goTo);
   const handOverToCurrent = useGameStore((s) => s.handOverToCurrent);
   const [query, setQuery] = useState('');
 
   const filtered = useMemo(() => {
+    // 綻び：書架にあるのに検索結果へ出てこない本（searchBlock）。
+    // システムメッセージは出さず、ただ静かに一覧から外す。
+    const visible = shelf.filter((id) => !searchBlocked.includes(id));
     const q = query.trim();
-    if (!q) return shelf;
-    return shelf.filter((id) => {
+    if (!q) return visible;
+    return visible.filter((id) => {
       const book = getBook(id);
       if (!book) return false;
       return book.title.includes(q) || book.summary.includes(q);
     });
-  }, [shelf, query]);
+  }, [shelf, searchBlocked, query]);
 
   return (
     <section className="flex flex-col gap-4 w-full max-w-xl px-6">
