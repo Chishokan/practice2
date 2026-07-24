@@ -93,4 +93,10 @@ export interface WorldState {
   anomalyLevel: number; // 0-4
   ledger: LedgerEntry[]; // 貸出台帳。改変対象
   reputation: number;
+
+  // --- 綻び演出が書き換える対象。設計書「5.」の実装に必要なため追加する。
+  /** 窓外の街の描写。綻びで段階的に簡素化される（townDescription） */
+  townText: string;
+  /** 存在するのに検索に出さない本（searchBlock）。参照先は必ず実在する本に限る */
+  searchBlocked: BookId[];
 }

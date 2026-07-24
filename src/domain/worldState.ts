@@ -5,6 +5,8 @@ import type { BookId, WorldState } from './types';
 export interface InitialWorldParams {
   shelf: BookId[];
   shelfCapacity: number;
+  /** 窓外の街の初期描写。テキストは content 側から渡す（domain は文言を持たない） */
+  townText?: string;
 }
 
 /**
@@ -23,5 +25,7 @@ export function createInitialWorldState(params: InitialWorldParams): WorldState 
     anomalyLevel: 0,
     ledger: [],
     reputation: 0,
+    townText: params.townText ?? '',
+    searchBlocked: [],
   };
 }
