@@ -1,17 +1,19 @@
 import { create } from 'zustand';
 import type { BookId, Scene, WorldState } from '../domain/types';
-import { createInitialWorldState } from '../domain/worldState';
+import { createInitialWorldState, startNextCycle } from '../domain/worldState';
 import { addToShelf, isShelfOverCapacity, removeFromShelf } from '../domain/shelf';
 import { handOver, selectReaction } from '../domain/visitor';
 import { evaluateAnomalies } from '../domain/anomaly';
 import { allBooks } from '../content/books';
 import { allVisitors, getVisitor } from '../content/visitors';
 import { anomalyRules, TOWN_STAGES } from '../content/anomalies';
+import { ANCHOR_BOOK_ID } from '../content/story';
+import { loadSave, toSaveData, writeSave, clearSave } from '../save/persistence';
 
 // Zustand は domain/ の純粋関数を呼ぶだけの薄い層に留める。
 // 分岐やルールの本体は domain 側に置く。
 
-/** 表示中の画面。'closed' は本日の閉館（Phase 1 の暫定終端） */
+/** 表示中の画面。'closed' は周回の終端（エンディング判定を表示） */
 export type Screen = 'reception' | 'shelf' | 'archive' | 'ledger' | 'closed';
 
 // 初期配置：先頭9冊を書架に、残り3冊を新刊の到着分として控える。
@@ -22,13 +24,22 @@ const DONATIONS: BookId[] = allBooks.slice(9).map((b) => b.id);
 
 const VISITOR_ORDER = allVisitors.map((v) => v.id);
 
+const CYCLE_PARAMS = {
+  baseShelf: INITIAL_SHELF,
+  shelfCapacity: SHELF_CAPACITY,
+  anchorId: ANCHOR_BOOK_ID,
+  townText: TOWN_STAGES[0],
+};
+
 interface GameStore {
   screen: Screen;
   world: WorldState;
 
   /** 現在の来訪者の位置 */
   visitorIndex: number;
-  /** 次に届く新刊（未消費の寄贈）のキュー位置 */
+  /** この周回で未消費の新刊キュー（前周で消した本は届かない） */
+  donationQueue: BookId[];
+  /** 次に届く新刊のキュー位置 */
   donationIndex: number;
   /** 反応／断りのシーン。表示中は要望ではなくこれを見せる */
   pendingScenes: Scene[] | null;
@@ -44,20 +55,52 @@ interface GameStore {
   proceed: () => void;
   /** 整理で1冊降ろす */
   lowerFromShelf: (bookId: BookId) => void;
+  /** 次の周回を始める（erasedBooks/conscience を引き継ぐ） */
+  nextCycle: () => void;
+  /** すべて捨てて1周目からやり直す（セーブも消す） */
+  restart: () => void;
 }
 
 function currentVisitorId(index: number): string | undefined {
   return VISITOR_ORDER[index];
 }
 
+/** 前周で消した本は届かない。届く新刊のキューを作る */
+function donationsFor(world: WorldState): BookId[] {
+  return DONATIONS.filter((id) => !world.erasedBooks.includes(id));
+}
+
+// セーブがあればその周回の開始点を復元し、無ければ1周目を作る。
+// 周回開始点をチェックポイントとして保存する（周回途中は保存しない）。
+function buildInitialState(): Pick<GameStore, 'world' | 'donationQueue'> {
+  const save = loadSave();
+  let world: WorldState;
+  if (save) {
+    const shelf = INITIAL_SHELF.filter((id) => !save.erasedBooks.includes(id));
+    world = {
+      ...createInitialWorldState({ shelf, shelfCapacity: SHELF_CAPACITY, townText: TOWN_STAGES[0] }),
+      cycle: save.cycle,
+      erasedBooks: save.erasedBooks,
+      conscience: save.conscience,
+    };
+  } else {
+    world = createInitialWorldState({
+      shelf: INITIAL_SHELF,
+      shelfCapacity: SHELF_CAPACITY,
+      townText: TOWN_STAGES[0],
+    });
+    writeSave(toSaveData(world));
+  }
+  return { world, donationQueue: donationsFor(world) };
+}
+
+const initial = buildInitialState();
+
 export const useGameStore = create<GameStore>((set, get) => ({
   screen: 'reception',
-  world: createInitialWorldState({
-    shelf: INITIAL_SHELF,
-    shelfCapacity: SHELF_CAPACITY,
-    townText: TOWN_STAGES[0],
-  }),
+  world: initial.world,
   visitorIndex: 0,
+  donationQueue: initial.donationQueue,
   donationIndex: 0,
   pendingScenes: null,
   handedOver: false,
@@ -84,13 +127,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   proceed: () => {
-    const { world, handedOver, donationIndex, visitorIndex } = get();
+    const { world, handedOver, donationQueue, donationIndex, visitorIndex } = get();
 
     // 手渡した回のみ、新刊が1冊届く（コアループ）。
     let nextWorld = world;
     let nextDonationIndex = donationIndex;
-    if (handedOver && donationIndex < DONATIONS.length) {
-      nextWorld = addToShelf(world, DONATIONS[donationIndex]);
+    if (handedOver && donationIndex < donationQueue.length) {
+      nextWorld = addToShelf(world, donationQueue[donationIndex]);
       nextDonationIndex = donationIndex + 1;
     }
 
@@ -120,9 +163,37 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
     advance(set, nextWorld, donationIndex, visitorIndex);
   },
+
+  nextCycle: () => {
+    const next = startNextCycle(get().world, CYCLE_PARAMS);
+    writeSave(toSaveData(next)); // 周回開始点を保存
+    set({
+      world: next,
+      visitorIndex: 0,
+      donationQueue: donationsFor(next),
+      donationIndex: 0,
+      pendingScenes: null,
+      handedOver: false,
+      screen: 'reception',
+    });
+  },
+
+  restart: () => {
+    clearSave();
+    const fresh = buildInitialState();
+    set({
+      world: fresh.world,
+      visitorIndex: 0,
+      donationQueue: fresh.donationQueue,
+      donationIndex: 0,
+      pendingScenes: null,
+      handedOver: false,
+      screen: 'reception',
+    });
+  },
 }));
 
-// 次の来訪者へ進む。居なければ閉館。
+// 次の来訪者へ進む。居なければ閉館（エンディングへ）。
 function advance(
   set: (partial: Partial<GameStore>) => void,
   world: WorldState,
