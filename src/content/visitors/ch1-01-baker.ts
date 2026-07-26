@@ -6,6 +6,21 @@ export const baker: Visitor = {
   displayName: 'パン屋の見習い',
   chapter: 1,
   order: 1,
+  // 性格スケッチ：人へ向く温度を見る。どれも要望へ合流し、反応は返さない。
+  characterScene: {
+    prompt: [
+      {
+        id: 'v01-char-prompt',
+        speaker: 'パン屋の見習い',
+        text: '祖母は無口な人で……でも、台所にいるときだけはよく喋ったな。',
+      },
+    ],
+    choices: [
+      { id: 'v01-c-listen', text: '「覚えてる範囲で、お祖母さんの話を聞かせて」', conscienceDelta: 1 },
+      { id: 'v01-c-work', text: '「では、それらしい本を探しますね」' },
+      { id: 'v01-c-quiet', text: '「……いい思い出だね」とだけ返す', conscienceDelta: 1 },
+    ],
+  },
   scenes: [
     { id: 'v01-req-1', speaker: 'パン屋の見習い', text: 'こんにちは。ちょっと、探している本があって。' },
     {
