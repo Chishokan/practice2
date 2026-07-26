@@ -9,7 +9,8 @@ import { allBooks } from '../content/books';
 import { allVisitors, getVisitor } from '../content/visitors';
 import { anomalyRules, TOWN_STAGES } from '../content/anomalies';
 import { ANCHOR_BOOK_ID } from '../content/story';
-import { loadSave, toSaveData, writeSave, clearSave } from '../save/persistence';
+import type { SaveData, SaveDataV2 } from '../save/persistence';
+import { loadSave, writeSave, clearSave } from '../save/persistence';
 
 // Zustand は domain/ の純粋関数を呼ぶだけの薄い層に留める。
 // 分岐やルールの本体は domain 側に置く。
@@ -75,41 +76,103 @@ function donationsFor(world: WorldState): BookId[] {
   return DONATIONS.filter((id) => !world.erasedBooks.includes(id));
 }
 
-// セーブがあればその周回の開始点を復元し、無ければ1周目を作る。
-// 周回開始点をチェックポイントとして保存する（周回途中は保存しない）。
-function buildInitialState(): Pick<GameStore, 'world' | 'donationQueue'> {
-  const save = loadSave();
-  let world: WorldState;
-  if (save) {
-    const shelf = INITIAL_SHELF.filter((id) => !save.erasedBooks.includes(id));
-    world = {
-      ...createInitialWorldState({ shelf, shelfCapacity: SHELF_CAPACITY, townText: TOWN_STAGES[0] }),
-      cycle: save.cycle,
-      erasedBooks: save.erasedBooks,
-      conscience: save.conscience,
-    };
-  } else {
-    world = createInitialWorldState({
-      shelf: INITIAL_SHELF,
-      shelfCapacity: SHELF_CAPACITY,
-      townText: TOWN_STAGES[0],
-    });
-    writeSave(toSaveData(world));
-  }
-  return { world, donationQueue: donationsFor(world) };
+/** 保存・復元する実行状態のスライス（アクションを除く） */
+type Runtime = Pick<
+  GameStore,
+  | 'screen'
+  | 'world'
+  | 'visitorIndex'
+  | 'donationQueue'
+  | 'donationIndex'
+  | 'pendingScenes'
+  | 'handedOver'
+  | 'characterAnswered'
+>;
+
+/** 実行状態を丸ごとスナップショットにする（flags は配列化） */
+function toSnapshot(s: Runtime): SaveDataV2 {
+  return {
+    version: 2,
+    world: { ...s.world, flags: [...s.world.flags] },
+    visitorIndex: s.visitorIndex,
+    donationQueue: s.donationQueue,
+    donationIndex: s.donationIndex,
+    handedOver: s.handedOver,
+    characterAnswered: s.characterAnswered,
+    pendingScenes: s.pendingScenes,
+    screen: s.screen,
+  };
 }
 
-const initial = buildInitialState();
+/** 1周目の初期実行状態 */
+function freshRuntime(): Runtime {
+  const world = createInitialWorldState({
+    shelf: INITIAL_SHELF,
+    shelfCapacity: SHELF_CAPACITY,
+    townText: TOWN_STAGES[0],
+  });
+  return {
+    screen: 'reception',
+    world,
+    visitorIndex: 0,
+    donationQueue: donationsFor(world),
+    donationIndex: 0,
+    pendingScenes: null,
+    handedOver: false,
+    characterAnswered: false,
+  };
+}
+
+/** 旧 v1（周回境界のみ）を、その周回の開始点として復元する */
+function runtimeFromV1(save: Extract<SaveData, { version: 1 }>): Runtime {
+  const shelf = INITIAL_SHELF.filter((id) => !save.erasedBooks.includes(id));
+  const world = {
+    ...createInitialWorldState({ shelf, shelfCapacity: SHELF_CAPACITY, townText: TOWN_STAGES[0] }),
+    cycle: save.cycle,
+    erasedBooks: save.erasedBooks,
+    conscience: save.conscience,
+  };
+  return {
+    screen: 'reception',
+    world,
+    visitorIndex: 0,
+    donationQueue: donationsFor(world),
+    donationIndex: 0,
+    pendingScenes: null,
+    handedOver: false,
+    characterAnswered: false,
+  };
+}
+
+/** v2（中断地点）をそのまま復元する。flags は Set へ戻す */
+function runtimeFromV2(save: SaveDataV2): Runtime {
+  return {
+    screen: save.screen as Screen,
+    world: { ...save.world, flags: new Set(save.world.flags) },
+    visitorIndex: save.visitorIndex,
+    donationQueue: save.donationQueue,
+    donationIndex: save.donationIndex,
+    pendingScenes: save.pendingScenes,
+    handedOver: save.handedOver,
+    characterAnswered: save.characterAnswered,
+  };
+}
+
+// セーブがあれば中断地点（v2）または周回開始点（v1）から復元し、無ければ1周目を作る。
+function buildInitialRuntime(): Runtime {
+  const save = loadSave();
+  if (!save) {
+    const fresh = freshRuntime();
+    writeSave(toSnapshot(fresh)); // 初回の開始点を保存
+    return fresh;
+  }
+  return save.version === 2 ? runtimeFromV2(save) : runtimeFromV1(save);
+}
+
+const initial = buildInitialRuntime();
 
 export const useGameStore = create<GameStore>((set, get) => ({
-  screen: 'reception',
-  world: initial.world,
-  visitorIndex: 0,
-  donationQueue: initial.donationQueue,
-  donationIndex: 0,
-  pendingScenes: null,
-  handedOver: false,
-  characterAnswered: false,
+  ...initial,
 
   goTo: (screen) => set({ screen }),
 
@@ -180,8 +243,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   nextCycle: () => {
+    // 周回跨ぎのキャリーは startNextCycle のまま（挙動不変）。保存は自動保存に任せる。
     const next = startNextCycle(get().world, CYCLE_PARAMS);
-    writeSave(toSaveData(next)); // 周回開始点を保存
     set({
       world: next,
       visitorIndex: 0,
@@ -196,19 +259,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   restart: () => {
     clearSave();
-    const fresh = buildInitialState();
-    set({
-      world: fresh.world,
-      visitorIndex: 0,
-      donationQueue: fresh.donationQueue,
-      donationIndex: 0,
-      pendingScenes: null,
-      handedOver: false,
-      characterAnswered: false,
-      screen: 'reception',
-    });
+    set({ ...freshRuntime() });
   },
 }));
+
+// 実行状態が変わるたびに自動保存する。
+// これにより conscience を含む途中状態が、周回途中のリロードでも失われない。
+useGameStore.subscribe((s) => writeSave(toSnapshot(s)));
 
 // 次の来訪者へ進む。居なければ閉館（エンディングへ）。
 function advance(
