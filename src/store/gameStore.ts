@@ -3,6 +3,7 @@ import type { BookId, Scene, WorldState } from '../domain/types';
 import { createInitialWorldState, startNextCycle } from '../domain/worldState';
 import { addToShelf, isShelfOverCapacity, removeFromShelf } from '../domain/shelf';
 import { handOver, selectReaction } from '../domain/visitor';
+import { applyChoice } from '../domain/choice';
 import { evaluateAnomalies } from '../domain/anomaly';
 import { allBooks } from '../content/books';
 import { allVisitors, getVisitor } from '../content/visitors';
@@ -45,8 +46,12 @@ interface GameStore {
   pendingScenes: Scene[] | null;
   /** この来訪で手渡し済みか（新刊到着の判定に使う） */
   handedOver: boolean;
+  /** この来訪で性格スケッチ選択を済ませたか（一度だけ提示する） */
+  characterAnswered: boolean;
 
   goTo: (screen: Screen) => void;
+  /** 性格スケッチ選択を選ぶ（無反応で要望へ合流する） */
+  chooseCharacter: (choiceId: string) => void;
   /** 現在の来訪者に本を手渡す */
   handOverToCurrent: (bookId: BookId) => void;
   /** 現在の来訪者を断る */
@@ -104,8 +109,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
   donationIndex: 0,
   pendingScenes: null,
   handedOver: false,
+  characterAnswered: false,
 
   goTo: (screen) => set({ screen }),
+
+  chooseCharacter: (choiceId) => {
+    const { world, visitorIndex } = get();
+    const visitor = getVisitor(currentVisitorId(visitorIndex) ?? '');
+    const choice = visitor?.characterScene?.choices.find((c) => c.id === choiceId);
+    if (!choice) return;
+    // 選択は無反応で合流する。conscience は不可視に加算される。
+    set({ world: applyChoice(world, choice), characterAnswered: true });
+  },
 
   handOverToCurrent: (bookId) => {
     const { world, visitorIndex } = get();
@@ -174,6 +189,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       donationIndex: 0,
       pendingScenes: null,
       handedOver: false,
+      characterAnswered: false,
       screen: 'reception',
     });
   },
@@ -188,6 +204,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       donationIndex: 0,
       pendingScenes: null,
       handedOver: false,
+      characterAnswered: false,
       screen: 'reception',
     });
   },
@@ -208,6 +225,7 @@ function advance(
     visitorIndex: nextIndex,
     pendingScenes: null,
     handedOver: false,
+    characterAnswered: false,
     screen: done ? 'closed' : 'reception',
   });
 }

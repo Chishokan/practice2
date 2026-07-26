@@ -6,8 +6,10 @@ import SceneView from '../components/SceneView';
 export default function Reception() {
   const visitorIndex = useGameStore((s) => s.visitorIndex);
   const pendingScenes = useGameStore((s) => s.pendingScenes);
+  const characterAnswered = useGameStore((s) => s.characterAnswered);
   const townText = useGameStore((s) => s.world.townText);
   const goTo = useGameStore((s) => s.goTo);
+  const chooseCharacter = useGameStore((s) => s.chooseCharacter);
   const refuseCurrent = useGameStore((s) => s.refuseCurrent);
   const proceed = useGameStore((s) => s.proceed);
 
@@ -15,6 +17,9 @@ export default function Reception() {
   if (!visitor) return null;
 
   const showingReaction = pendingScenes !== null;
+  // 反応表示中でなく、性格スケッチが未回答なら、要望より先に一度だけ提示する。
+  const character = visitor.characterScene;
+  const showingCharacter = !showingReaction && character !== undefined && !characterAnswered;
 
   return (
     <section className="flex flex-col gap-6 w-full max-w-xl px-6">
@@ -34,32 +39,53 @@ export default function Reception() {
         </button>
       </div>
 
-      <SceneView scenes={showingReaction ? pendingScenes : visitor.scenes} />
+      {showingCharacter && character ? (
+        <>
+          <SceneView scenes={character.prompt} />
+          {/* 選択は縦並び。選んでも反応は返さず、そのまま要望へ合流する */}
+          <div className="flex flex-col gap-2">
+            {character.choices.map((choice) => (
+              <button
+                key={choice.id}
+                type="button"
+                onClick={() => chooseCharacter(choice.id)}
+                className="border border-neutral-700 px-4 py-2 text-left text-neutral-200"
+              >
+                {choice.text}
+              </button>
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <SceneView scenes={showingReaction ? pendingScenes : visitor.scenes} />
 
-      <div className="flex gap-3">
-        {showingReaction ? (
-          <button type="button" onClick={proceed} className="border border-neutral-500 px-4 py-2">
-            次へ
-          </button>
-        ) : (
-          <>
-            <button
-              type="button"
-              onClick={() => goTo('shelf')}
-              className="border border-neutral-500 px-4 py-2"
-            >
-              本を選ぶ
-            </button>
-            <button
-              type="button"
-              onClick={refuseCurrent}
-              className="border border-neutral-700 px-4 py-2 text-neutral-400"
-            >
-              お断りする
-            </button>
-          </>
-        )}
-      </div>
+          <div className="flex gap-3">
+            {showingReaction ? (
+              <button type="button" onClick={proceed} className="border border-neutral-500 px-4 py-2">
+                次へ
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => goTo('shelf')}
+                  className="border border-neutral-500 px-4 py-2"
+                >
+                  本を選ぶ
+                </button>
+                <button
+                  type="button"
+                  onClick={refuseCurrent}
+                  className="border border-neutral-700 px-4 py-2 text-neutral-400"
+                >
+                  お断りする
+                </button>
+              </>
+            )}
+          </div>
+        </>
+      )}
     </section>
   );
 }
