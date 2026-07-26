@@ -55,7 +55,11 @@ const townSimplify: AnomalyRule = {
 
 // Lv4: 書架にあるのに検索に出ない本が生まれる。
 // 「確かに見たのに」と思わせる、消失の最終段階。対象は実在かつ書架にある本に限る。
-const SEARCH_BLOCK_TARGET: BookId = 'b07-library-plan';
+//
+// 標的はアンカー（ANCHOR_BOOK_ID）と必ず別の本にすること。アンカーは TRUE の要で
+// 毎周復活・保全対象のため、検索から隠すと「守る動線」と衝突する（設計書 §12.4）。
+// b09-kingdoms は非アンカーで、第3章の書架に存在し得る歴史書。消えても TRUE を妨げない。
+export const SEARCH_BLOCK_TARGET: BookId = 'b09-kingdoms';
 const searchBlock: AnomalyRule = {
   id: 'search-block',
   threshold: 4,
