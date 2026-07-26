@@ -9,6 +9,18 @@ export function isShelfOverCapacity(state: WorldState): boolean {
 }
 
 /**
+ * 検索・一覧に見える書架（searchBlock を静かに除外）。
+ *
+ * 綻び（searchBlock）で `searchBlocked` に入った本は、実際には書架にあるのに
+ * この一覧からは消える。整理画面（Archive）は逆に `shelf` 全体を扱うため、
+ * 「探すと無いのに整理には有る」という意図的な非対称が生まれる（設計上の演出）。
+ * この非対称はバグではない。詳細は ui/screens/Shelf.tsx と content/anomalies.ts。
+ */
+export function visibleShelf(state: WorldState): BookId[] {
+  return state.shelf.filter((id) => !state.searchBlocked.includes(id));
+}
+
+/**
  * 書架に本を1冊加える（新刊の到着など）。
  * すでに書架にある本は二重に積まない。
  */

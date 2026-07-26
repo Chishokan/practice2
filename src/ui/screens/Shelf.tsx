@@ -1,20 +1,23 @@
 import { useMemo, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
+import { visibleShelf } from '../../domain/shelf';
 import { getBook } from '../../content/books';
 import BookList from '../components/BookList';
 
 // 書架。蔵書を検索し、現在の来訪者に手渡す本を選ぶ。
 export default function Shelf() {
-  const shelf = useGameStore((s) => s.world.shelf);
-  const searchBlocked = useGameStore((s) => s.world.searchBlocked);
+  const world = useGameStore((s) => s.world);
   const goTo = useGameStore((s) => s.goTo);
   const handOverToCurrent = useGameStore((s) => s.handOverToCurrent);
   const [query, setQuery] = useState('');
 
   const filtered = useMemo(() => {
-    // 綻び：書架にあるのに検索結果へ出てこない本（searchBlock）。
-    // システムメッセージは出さず、ただ静かに一覧から外す。
-    const visible = shelf.filter((id) => !searchBlocked.includes(id));
+    // 綻び：searchBlock で隠れた本は visibleShelf が静かに外す。システムメッセージは出さない。
+    //
+    // 【意図的な非対称・バグではない】ここ（検索・一覧）から消える本も、
+    // 整理画面（Archive）には引き続き現れて降ろせる。「探すと無いのに整理には有る」
+    // という不気味さを狙った演出。visibleShelf を使わず shelf 全体に戻さないこと。
+    const visible = visibleShelf(world);
     const q = query.trim();
     if (!q) return visible;
     return visible.filter((id) => {
@@ -22,7 +25,7 @@ export default function Shelf() {
       if (!book) return false;
       return book.title.includes(q) || book.summary.includes(q);
     });
-  }, [shelf, searchBlocked, query]);
+  }, [world, query]);
 
   return (
     <section className="flex flex-col gap-4 w-full max-w-xl px-6">
