@@ -93,6 +93,11 @@ export interface WorldState {
   anomalyLevel: number; // 0-4
   ledger: LedgerEntry[]; // 貸出台帳。改変対象
   reputation: number;
+  /**
+   * 人柄の隠し評価値。案内役が主人公の性格を見る軸（設計書「12.5」）。
+   * 不可視・周回永続。トゥルーの意志ゲート（B）に使う。
+   */
+  conscience: number;
 
   // --- 綻び演出が書き換える対象。設計書「5.」の実装に必要なため追加する。
   /** 窓外の街の描写。綻びで段階的に簡素化される（townDescription） */

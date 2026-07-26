@@ -25,6 +25,7 @@ export function createInitialWorldState(params: InitialWorldParams): WorldState 
     anomalyLevel: 0,
     ledger: [],
     reputation: 0,
+    conscience: 0,
     townText: params.townText ?? '',
     searchBlocked: [],
   };
