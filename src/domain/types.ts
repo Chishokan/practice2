@@ -41,6 +41,30 @@ export interface Scene {
 }
 
 /**
+ * 性格スケッチ選択の1択（設計書「12.5」）。
+ * プレイヤーの人柄を映すが、本筋・本の正誤・評判は変えない（合流）。
+ * conscienceDelta と flags は不可視の効果に限る。
+ */
+export interface Choice {
+  id: string;
+  /** 選択肢の表示テキスト */
+  text: string;
+  /** 案内役が見る隠し評価値の増減（省略時は0） */
+  conscienceDelta?: number;
+  /** 立てるフラグ（任意） */
+  flags?: FlagId[];
+}
+
+/**
+ * 来訪者に付く任意の性格スケッチ場面。状況提示のあと選択を1回だけ提示する。
+ * どの選択もフィードバックを返さず、要望へ合流する。
+ */
+export interface CharacterScene {
+  prompt: Scene[];
+  choices: Choice[];
+}
+
+/**
  * 来訪者の登場条件。フラグ・消去済みの本・周回数で制御する。
  * 「消去された本で来訪者ルートが封じられる」機構に必要。
  */
@@ -73,6 +97,8 @@ export interface Visitor {
   order: number;
   /** 来訪の条件（フラグ／消去済みの本／周回数） */
   conditions?: VisitorCondition;
+  /** 任意の性格スケッチ場面。要望の前に一度だけ提示する */
+  characterScene?: CharacterScene;
   scenes: Scene[];
   /** 要望に応え得る本。複数正解を許す */
   acceptableBooks: BookId[];
