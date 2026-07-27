@@ -2,10 +2,11 @@ import type { Visitor, VisitorId } from '../../domain/types';
 import { baker } from './ch1-01-baker';
 import { sailor } from './ch1-02-sailor';
 import { child } from './ch1-03-child';
+import { tinker } from './ch1-04-tinker';
 
 // 全来訪者を order 順に集約する。
 
-export const allVisitors: Visitor[] = [baker, sailor, child].sort(
+export const allVisitors: Visitor[] = [baker, sailor, child, tinker].sort(
   (a, b) => a.order - b.order,
 );
 
