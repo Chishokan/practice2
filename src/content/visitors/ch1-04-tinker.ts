@@ -8,9 +8,8 @@ export const tinker: Visitor = {
   id: 'v04-tinker',
   displayName: '町のからくり好き',
   chapter: 1,
-  // 登場順は暫定で4（既存の baker/sailor/child と衝突させない）。
-  // 全6人が揃った段階で、設計表どおり tinker を3番手へ並べ替える（order の振り直しのみ）。
-  order: 4,
+  // 登場順（設計表確定）：3番手＝ユーモア枠。sailor の後、child の前。
+  order: 3,
   // 性格スケッチ：大言壮語にどう付き合うか。正解は作らず、要望へ無反応で合流する。
   characterScene: {
     prompt: [

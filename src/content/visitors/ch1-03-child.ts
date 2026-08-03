@@ -9,7 +9,8 @@ export const child: Visitor = {
   id: 'v03-child',
   displayName: '星を見る子ども',
   chapter: 1,
-  order: 3,
+  // 登場順（設計表確定）：4番手＝純度・温度。tinker の後、teacher の前。
+  order: 4,
   // 性格スケッチ：子ども相手の対応で人柄が出る。優しさ vs 厳密さ。正解は作らない。
   characterScene: {
     prompt: [

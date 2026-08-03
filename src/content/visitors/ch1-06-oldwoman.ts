@@ -14,7 +14,7 @@ export const oldwoman: Visitor = {
   id: 'v06-oldwoman',
   displayName: '常連の老女',
   chapter: 1,
-  // 暫定 order（締め＝最後）。全6人が揃い次第、設計表どおりに並べ替える。
+  // 登場順（設計表確定）：6番手＝締め。
   order: 6,
   // 性格スケッチ：亡き夫の話に触れるか。正解は作らない。
   characterScene: {

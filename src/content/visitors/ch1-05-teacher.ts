@@ -18,7 +18,7 @@ export const teacher: Visitor = {
   id: 'v05-teacher',
   displayName: '村を出る教師',
   chapter: 1,
-  // 暫定 order。全6人が揃い次第、設計表どおりに並べ替える。
+  // 登場順（設計表確定）：5番手＝伏線の芯。
   order: 5,
   // 性格スケッチ：「なぜ司書を?」の自問（§12.5）。保存への動機を正解に見せない。
   characterScene: {
