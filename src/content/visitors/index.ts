@@ -4,12 +4,18 @@ import { sailor } from './ch1-02-sailor';
 import { child } from './ch1-03-child';
 import { tinker } from './ch1-04-tinker';
 import { teacher } from './ch1-05-teacher';
+import { oldwoman } from './ch1-06-oldwoman';
 
 // 全来訪者を order 順に集約する。
 
-export const allVisitors: Visitor[] = [baker, sailor, child, tinker, teacher].sort(
-  (a, b) => a.order - b.order,
-);
+export const allVisitors: Visitor[] = [
+  baker,
+  sailor,
+  child,
+  tinker,
+  teacher,
+  oldwoman,
+].sort((a, b) => a.order - b.order);
 
 const visitorById = new Map<VisitorId, Visitor>(
   allVisitors.map((v) => [v.id, v]),
