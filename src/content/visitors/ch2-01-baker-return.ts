@@ -36,8 +36,8 @@ export const bakerReturn: Visitor = {
       },
     ],
     choices: [
-      { id: 'v07-c-ask', text: '「……前にも、いらしたことは?」', conscienceDelta: 1 },
       { id: 'v07-c-flow', text: '（何も言わず、新しいお客さまとして迎える）' },
+      { id: 'v07-c-ask', text: '「……前にも、いらしたことは?」', conscienceDelta: 1 },
       { id: 'v07-c-warm', text: '「ようこそ。ゆっくりしていってくださいね」', conscienceDelta: 1 },
     ],
   },

@@ -27,8 +27,8 @@ export const peddler: Visitor = {
     ],
     choices: [
       { id: 'v08-c-listen', text: '「よろしければ、道中のお話を」', conscienceDelta: 1 },
-      { id: 'v08-c-work', text: '「ご用の本を伺いましょう」' },
       { id: 'v08-c-rest', text: '「まずは、お掛けください。長旅でしょう」', conscienceDelta: 1 },
+      { id: 'v08-c-work', text: '「ご用の本を伺いましょう」' },
     ],
   },
   scenes: [

@@ -25,8 +25,8 @@ export const antiquarian: Visitor = {
       },
     ],
     choices: [
-      { id: 'v10-c-listen', text: '「面白いお仕事ですね。聞かせてください」', conscienceDelta: 1 },
       { id: 'v10-c-work', text: '「お探しの記録を、伺いましょう」' },
+      { id: 'v10-c-listen', text: '「面白いお仕事ですね。聞かせてください」', conscienceDelta: 1 },
       { id: 'v10-c-care', text: '「どうか、根を詰めすぎませんように」', conscienceDelta: 1 },
     ],
   },

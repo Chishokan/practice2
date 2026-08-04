@@ -20,8 +20,8 @@ export const tinker: Visitor = {
       },
     ],
     choices: [
-      { id: 'v04-c-play', text: '「完成したら、真っ先に見せてくださいね」', conscienceDelta: 1 },
       { id: 'v04-c-ground', text: '「まずは、無事に動くといいですね」' },
+      { id: 'v04-c-play', text: '「完成したら、真っ先に見せてくださいね」', conscienceDelta: 1 },
       { id: 'v04-c-tech', text: '「軸の受けは、もう考えてあるんですか？」', conscienceDelta: 1 },
     ],
   },

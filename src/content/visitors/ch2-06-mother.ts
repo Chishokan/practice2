@@ -26,13 +26,13 @@ export const mother: Visitor = {
       {
         id: 'v12-char-prompt',
         speaker: '幼子の母',
-        text: 'こんにちは。うちの子に、寝る前の一冊を借りたくて。お話でも、子守唄でも……あの子が、しばらく大人しくしてくれるものなら、何でも。ふふ。',
+        text: 'こんにちは。うちの子に、寝る前の一冊を借りたくて。お話でも、子守唄でも……あの子が、しばらく大人しくしてくれるものなら、何でも。',
       },
     ],
     choices: [
+      { id: 'v12-c-work', text: '「では、お話の本をいくつか」' },
       { id: 'v12-c-ask', text: '「お子さんは、どんなお話がお好きですか」', conscienceDelta: 1 },
       { id: 'v12-c-care', text: '「毎日、子育てお疲れさまです」', conscienceDelta: 1 },
-      { id: 'v12-c-work', text: '「では、お話の本をいくつか」' },
     ],
   },
   scenes: [
@@ -82,7 +82,7 @@ export const mother: Visitor = {
     {
       id: 'v12-refuse',
       speaker: '幼子の母',
-      text: 'そうですか、今日は。いいんです、また来ますから。……あの子が、どうしてもここに来たがるので。ふふ、それじゃあ、また。',
+      text: 'そうですか、今日は。いいんです、また来ますから。……あの子が、どうしてもここに来たがるので。それじゃあ、また。',
     },
   ],
   flagsOnResolve: ['v12-mother-resolved'],

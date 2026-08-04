@@ -30,8 +30,8 @@ export const teacher: Visitor = {
       },
     ],
     choices: [
-      { id: 'v05-c-keep', text: '「失くしたくないものが、あるんです」', conscienceDelta: 1 },
       { id: 'v05-c-job', text: '「たまたま、空いていた仕事だったので」' },
+      { id: 'v05-c-keep', text: '「失くしたくないものが、あるんです」', conscienceDelta: 1 },
       { id: 'v05-c-hide', text: '「ここなら、誰にも会わずにいられるから」' },
     ],
   },

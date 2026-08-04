@@ -20,8 +20,8 @@ export const baker: Visitor = {
       },
     ],
     choices: [
-      { id: 'v01-c-listen', text: '「覚えてる範囲で、お祖母さんの話を聞かせて」', conscienceDelta: 1 },
       { id: 'v01-c-work', text: '「では、それらしい本を探しますね」' },
+      { id: 'v01-c-listen', text: '「覚えてる範囲で、お祖母さんの話を聞かせて」', conscienceDelta: 1 },
       { id: 'v01-c-quiet', text: '「……いい思い出ですね」とだけ返す', conscienceDelta: 1 },
     ],
   },
