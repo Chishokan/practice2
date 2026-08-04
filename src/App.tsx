@@ -1,4 +1,5 @@
 import { useGameStore } from './store/gameStore';
+import Intro from './ui/screens/Intro';
 import Reception from './ui/screens/Reception';
 import Shelf from './ui/screens/Shelf';
 import Archive from './ui/screens/Archive';
@@ -11,6 +12,7 @@ export default function App() {
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-neutral-900 text-neutral-100 py-12">
+      {screen === 'intro' && <Intro />}
       {screen === 'shelf' && <Shelf />}
       {screen === 'archive' && <Archive />}
       {screen === 'ledger' && <Ledger />}

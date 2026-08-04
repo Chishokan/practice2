@@ -15,8 +15,8 @@ import { loadSave, writeSave, clearSave } from '../save/persistence';
 // Zustand は domain/ の純粋関数を呼ぶだけの薄い層に留める。
 // 分岐やルールの本体は domain 側に置く。
 
-/** 表示中の画面。'closed' は周回の終端（エンディング判定を表示） */
-export type Screen = 'reception' | 'shelf' | 'archive' | 'ledger' | 'closed';
+/** 表示中の画面。'intro' は着任時の案内役登場、'closed' は周回の終端 */
+export type Screen = 'intro' | 'reception' | 'shelf' | 'archive' | 'ledger' | 'closed';
 
 // 初期配置：先頭9冊を書架に、残り3冊を新刊の到着分として控える。
 // 容量ちょうどから始めるので、手渡しで1冊届くたびに整理が要求される。
@@ -104,7 +104,7 @@ function toSnapshot(s: Runtime): SaveDataV2 {
   };
 }
 
-/** 1周目の初期実行状態 */
+/** 1周目の初期実行状態。着任時は案内役の登場（intro）から始まる */
 function freshRuntime(): Runtime {
   const world = createInitialWorldState({
     shelf: INITIAL_SHELF,
@@ -112,7 +112,7 @@ function freshRuntime(): Runtime {
     townText: TOWN_STAGES[0],
   });
   return {
-    screen: 'reception',
+    screen: 'intro',
     world,
     visitorIndex: 0,
     donationQueue: donationsFor(world),
