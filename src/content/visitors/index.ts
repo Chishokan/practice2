@@ -9,6 +9,7 @@ import { bakerReturn } from './ch2-01-baker-return';
 import { peddler } from './ch2-02-peddler';
 import { clerk } from './ch2-03-clerk';
 import { antiquarian } from './ch2-04-antiquarian';
+import { musician } from './ch2-05-musician';
 
 // 全来訪者を order 順に集約する。
 // order 1-6＝第1章、7以降＝第2章（章境界の演出は Phase 6）。
@@ -24,6 +25,7 @@ export const allVisitors: Visitor[] = [
   peddler,
   clerk,
   antiquarian,
+  musician,
 ].sort((a, b) => a.order - b.order);
 
 const visitorById = new Map<VisitorId, Visitor>(
