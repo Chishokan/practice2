@@ -5,6 +5,7 @@ import { addToShelf, isShelfOverCapacity, removeFromShelf } from '../domain/shel
 import { handOver, selectReaction } from '../domain/visitor';
 import { applyChoice } from '../domain/choice';
 import { evaluateAnomalies } from '../domain/anomaly';
+import { chapterTransition } from '../domain/chapter';
 import { allBooks } from '../content/books';
 import { allVisitors, getVisitor } from '../content/visitors';
 import { anomalyRules, TOWN_STAGES } from '../content/anomalies';
@@ -15,8 +16,15 @@ import { loadSave, writeSave, clearSave } from '../save/persistence';
 // Zustand は domain/ の純粋関数を呼ぶだけの薄い層に留める。
 // 分岐やルールの本体は domain 側に置く。
 
-/** 表示中の画面。'intro' は着任時の案内役登場、'closed' は周回の終端 */
-export type Screen = 'intro' | 'reception' | 'shelf' | 'archive' | 'ledger' | 'closed';
+/** 表示中の画面。'intro'=着任時の案内役、'interlude'=章の幕間、'closed'=周回の終端 */
+export type Screen =
+  | 'intro'
+  | 'interlude'
+  | 'reception'
+  | 'shelf'
+  | 'archive'
+  | 'ledger'
+  | 'closed';
 
 // 初期配置：先頭9冊を書架に、残り3冊を新刊の到着分として控える。
 // 容量ちょうどから始めるので、手渡しで1冊届くたびに整理が要求される。
@@ -59,6 +67,8 @@ interface GameStore {
   refuseCurrent: () => void;
   /** 反応シーンを読み終えて次へ進む（新刊到着・整理・次の来訪者） */
   proceed: () => void;
+  /** 章の幕間を読み終えて次章へ進む */
+  proceedInterlude: () => void;
   /** 整理で1冊降ろす */
   lowerFromShelf: (bookId: BookId) => void;
   /** 次の周回を始める（erasedBooks/conscience を引き継ぐ） */
@@ -229,6 +239,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     advance(set, nextWorld, nextDonationIndex, visitorIndex);
   },
 
+  proceedInterlude: () => {
+    // 幕間中は visitorIndex が次章の先頭を指す。来訪者が居なければ閉館へ。
+    const { visitorIndex } = get();
+    set({ screen: visitorIndex >= VISITOR_ORDER.length ? 'closed' : 'reception' });
+  },
+
   lowerFromShelf: (bookId) => {
     const { world, donationIndex, visitorIndex } = get();
     // 降ろした直後に綻びを評価する（整理実行時に評価するのが設計）。
@@ -267,7 +283,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 // これにより conscience を含む途中状態が、周回途中のリロードでも失われない。
 useGameStore.subscribe((s) => writeSave(toSnapshot(s)));
 
-// 次の来訪者へ進む。居なければ閉館（エンディングへ）。
+// 次の来訪者へ進む。章が上がるなら幕間、来訪者が尽きたら閉館（エンディングへ）。
 function advance(
   set: (partial: Partial<GameStore>) => void,
   world: WorldState,
@@ -275,16 +291,36 @@ function advance(
   visitorIndex: number,
 ): void {
   const nextIndex = visitorIndex + 1;
-  const done = nextIndex >= VISITOR_ORDER.length;
-  set({
-    world,
+  const total = VISITOR_ORDER.length;
+  const nextVisitorChapter =
+    nextIndex < total ? getVisitor(VISITOR_ORDER[nextIndex])?.chapter ?? null : null;
+  const t = chapterTransition({
+    currentChapter: world.chapter,
+    nextIndex,
+    total,
+    nextVisitorChapter,
+  });
+
+  const base = {
     donationIndex,
     visitorIndex: nextIndex,
     pendingScenes: null,
     handedOver: false,
     characterAnswered: false,
-    screen: done ? 'closed' : 'reception',
-  });
+  };
+
+  if (t.interlude) {
+    // 章遷移時に綻びを再評価する（新しい章上限で anomalyLevel を更新し、
+    // 第3章では searchBlock 発動域に到達させる）。UI へは何も通知しない。
+    const nextWorld = evaluateAnomalies(
+      { ...world, chapter: t.chapter as 1 | 2 | 3 },
+      anomalyRules,
+    );
+    set({ ...base, world: nextWorld, screen: 'interlude' });
+    return;
+  }
+
+  set({ ...base, world, screen: t.done ? 'closed' : 'reception' });
 }
 
 export { VISITOR_ORDER };

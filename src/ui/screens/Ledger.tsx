@@ -1,9 +1,11 @@
 import { useGameStore } from '../../store/gameStore';
 import { getBook } from '../../content/books';
 import { getVisitor } from '../../content/visitors';
+import CatalogPage from '../components/CatalogPage';
 
 // 貸出台帳。過去の貸出を淡々と並べるだけ。
 // 綻びで一行が書き換わっても、ここは何の注記もせず静かに表示する（仕様）。
+// 収蔵目録は独立UIを新設せず、シグネチャ要素の台帳へ一節として寄せる（規約）。
 export default function Ledger() {
   const ledger = useGameStore((s) => s.world.ledger);
   const goTo = useGameStore((s) => s.goTo);
@@ -19,6 +21,12 @@ export default function Ledger() {
         >
           閉じる
         </button>
+      </div>
+
+      <CatalogPage />
+
+      <div className="pt-2">
+        <h2 className="text-lg text-neutral-300 pb-1">貸出の記録</h2>
       </div>
 
       {ledger.length === 0 ? (
