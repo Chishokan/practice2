@@ -13,6 +13,7 @@ import { musician } from './ch2-05-musician';
 import { mother } from './ch2-06-mother';
 import { teacherReturn } from './ch3-01-teacher-return';
 import { sailorReturn } from './ch3-02-sailor-return';
+import { antiquarianReturn } from './ch3-03-antiquarian-return';
 
 // 全来訪者を order 順に集約する。
 // order 1-6＝第1章、7-12＝第2章、13-＝第3章（再訪＝新顔ゼロ）。
@@ -32,6 +33,7 @@ export const allVisitors: Visitor[] = [
   mother,
   teacherReturn,
   sailorReturn,
+  antiquarianReturn,
 ].sort((a, b) => a.order - b.order);
 
 const visitorById = new Map<VisitorId, Visitor>(
