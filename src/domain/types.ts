@@ -56,6 +56,16 @@ export interface Choice {
 }
 
 /**
+ * 収蔵目録の一項目（設計書「12.3」）。降ろす（＝収蔵する）ことで埋まる。
+ * requiredBookId が null の項目は、後の章で使う予約枠。
+ * id を安定させ、将来の差し替え・非表示（欠落・書き換えの舞台）に耐える構造にする。
+ */
+export interface CatalogEntry {
+  id: string;
+  requiredBookId: BookId | null;
+}
+
+/**
  * 来訪者に付く任意の性格スケッチ場面。状況提示のあと選択を1回だけ提示する。
  * どの選択もフィードバックを返さず、要望へ合流する。
  */

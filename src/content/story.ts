@@ -41,3 +41,9 @@ export const ENDING_LABELS: Record<EndingId, string> = {
   E4: '継承',
   TRUE: '最初の一冊',
 };
+
+// 章の幕間（静かに。大げさな演出はしない。地の文1行）。文言は仮（ディレクター承認対象）。
+export const CHAPTER_INTERLUDES: Record<number, { title: string; line: string }> = {
+  2: { title: '第二章', line: '季節がひとつ、めぐった。図書館の日々は、変わらず続いていく。' },
+  3: { title: '第三章', line: 'また季節がめぐる。目録は、少しずつ埋まっていく。' },
+};
