@@ -2,6 +2,15 @@ import type { Scene } from '../domain/types';
 
 // 終幕（18b）の非・妖精テキスト。妖精の台詞は guide.ts に集約（出所の一元化）。
 
+// 最終閉館日（修正1）：最後の来訪者のあと、閉館までの自由時間。システム通知調にしない。
+// この窓の中で 台帳→開示→探索→是正3→整理→地下 の既存連鎖が成立する。
+export const FINAL_DAY_SCENES: Scene[] = [
+  { id: 'final-day-1', text: '日が傾いて、閲覧室に西日が長く伸びている。今日は、もう誰も来ないようだ。' },
+  { id: 'final-day-2', text: '……閉館まで、あなたひとりの時間。' },
+];
+export const CLOSE_LIBRARY_LABEL = '閉館する';
+export const TIDY_SHELF_LABEL = '書架を整理する';
+
 // 対峙の選択肢文言。司書側の反論は最大一行（TRUE の反論は言葉でなく名と絵本で示す）。
 export const CONFRONT_CHOICE_COMPLETE = '目録を、完成させる。';
 export const CONFRONT_CHOICE_BEQUEATH = '……ここで、止める。台帳は、次の人へ。';

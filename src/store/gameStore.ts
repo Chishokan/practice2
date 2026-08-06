@@ -94,6 +94,8 @@ interface GameStore {
   returnFromBasement: () => void;
   /** 地下の進行フラグを立てる（錠解除・絵本発見）。conscience には影響しない */
   markFlag: (flag: FlagId) => void;
+  /** 最終閉館日に「閉館する」＝周回の終端（エンディング判定）へ */
+  closeLibrary: () => void;
   /** 性格スケッチ選択を選ぶ（無反応で要望へ合流する） */
   chooseCharacter: (choiceId: string) => void;
   /** 現在の来訪者に本を手渡す */
@@ -251,6 +253,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   returnFromBasement: () => set({ screen: 'confront' }),
 
   markFlag: (flag) => set({ world: addFlag(get().world, flag) }),
+
+  closeLibrary: () => set({ screen: 'closed' }),
 
   chooseCharacter: (choiceId) => {
     const { world, visitorIndex } = get();
@@ -415,7 +419,9 @@ function advance(
     return;
   }
 
-  set({ ...base, world, screen: t.done ? 'closed' : 'reception' });
+  // 来訪者が尽きても即・閉館にはしない。最終閉館日の自由時間（reception）に留める。
+  // 実際の閉館は「閉館する」（closeLibrary）まで保留＝この窓で地下への連鎖が成立する。
+  set({ ...base, world, screen: 'reception' });
 }
 
 export { VISITOR_ORDER };

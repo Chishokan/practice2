@@ -54,6 +54,21 @@ describe('determineEnding — 全エンド到達可能', () => {
   });
 });
 
+describe('最終閉館日：真相成立後に chose-* 未付与で閉館した帰結（determineEnding 不変）', () => {
+  it('2ゲート充足なら、対峙せず閉館しても TRUE（優先順位のまま）', () => {
+    const w = { ...base(), conscience: 3, ledger: withLedger(5), flags: new Set(['truth-reached']) };
+    expect(determineEnding(w, cfg)).toBe('TRUE');
+  });
+  it('評価値不足＋手渡し≥3 なら E1（降りたが救済条件を満たさず閉館）', () => {
+    const w = { ...base(), conscience: 1, ledger: withLedger(3), flags: new Set(['truth-reached']) };
+    expect(determineEnding(w, cfg)).toBe('E1');
+  });
+  it('評価値不足＋手渡し<3 なら E2', () => {
+    const w = { ...base(), conscience: 1, ledger: withLedger(1), flags: new Set(['truth-reached']) };
+    expect(determineEnding(w, cfg)).toBe('E2');
+  });
+});
+
 describe('2段ゲート', () => {
   it('アンカーを消すと TRUE は不成立（ゲートA）', () => {
     const w = {
