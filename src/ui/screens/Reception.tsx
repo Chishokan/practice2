@@ -9,6 +9,7 @@ export default function Reception() {
   const characterAnswered = useGameStore((s) => s.characterAnswered);
   const townText = useGameStore((s) => s.world.townText);
   const goTo = useGameStore((s) => s.goTo);
+  const openLedger = useGameStore((s) => s.openLedger);
   const chooseCharacter = useGameStore((s) => s.chooseCharacter);
   const refuseCurrent = useGameStore((s) => s.refuseCurrent);
   const proceed = useGameStore((s) => s.proceed);
@@ -32,7 +33,7 @@ export default function Reception() {
         <h1 className="text-xl text-neutral-300">{visitor.displayName}</h1>
         <button
           type="button"
-          onClick={() => goTo('ledger')}
+          onClick={() => openLedger('reception')}
           className="text-sm text-neutral-500 underline underline-offset-4"
         >
           台帳

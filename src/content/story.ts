@@ -27,6 +27,12 @@ export const FLAG_GUIDE_FINAL_REMARK: FlagId = 'guide-final-remark-shown';
 
 /** 予約枠のエントリ id（開示対象の特定に使う） */
 export const CATALOG_FINAL_ID = 'cat-final';
+
+// 地下探索（beat 18a）で立つフラグ。
+/** ⑦地下の錠を解いた（保存庫が開いた）。再入時に錠をやり直させないため永続化する */
+export const FLAG_BASEMENT_UNLOCKED: FlagId = 'basement-unlocked';
+/** 金色の絵本を手に取った（持ち出す/読む/戻すの決断は 18b） */
+export const FLAG_GOLDEN_BOOK_FOUND: FlagId = 'golden-book-found';
 /**
  * 開示後の cat-final 行の表示題（ディレクター確定）。
  * 目録は絵本を「記述」できても「名指せ」ない——名は目録に載らない原則を目録自身に演じさせる。

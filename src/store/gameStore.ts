@@ -11,14 +11,17 @@ import {
   shouldFireGuideFinalRemark,
   markGuideFinalRemarkFired,
 } from '../domain/catalog';
+import { applyDescent, addFlag } from '../domain/basement';
 import { allBooks } from '../content/books';
 import { allVisitors, getVisitor } from '../content/visitors';
 import { anomalyRules, TOWN_STAGES } from '../content/anomalies';
+import type { FlagId } from '../domain/types';
 import {
   ANCHOR_BOOK_ID,
   FLAG_V17_RESOLVED,
   FLAG_CATALOG_FINAL_REVEALED,
   FLAG_GUIDE_FINAL_REMARK,
+  FLAG_TRUTH_REACHED,
   CATALOG_FINAL_REVEAL_LABEL,
 } from '../content/story';
 import { guideFinalRemarkScenes } from '../content/guide';
@@ -36,6 +39,7 @@ export type Screen =
   | 'shelf'
   | 'archive'
   | 'ledger'
+  | 'basement'
   | 'closed';
 
 // 初期配置：先頭9冊を書架に、残り3冊を新刊の到着分として控える。
@@ -73,8 +77,20 @@ interface GameStore {
   guideRemark: Scene[] | null;
   /** 書架を開いたときの初期検索語（金色の絵本の探索導線）。消費したら null に戻す */
   pendingShelfQuery: string | null;
+  /** 台帳を閉じたときの戻り先（受付／地下の錠から見に来た場合など）。永続しない */
+  ledgerReturn: Screen;
 
   goTo: (screen: Screen) => void;
+  /** 台帳（目録）を開く。戻り先を覚えつつ、必要なら cat-final を開示する */
+  openLedger: (origin: Screen) => void;
+  /** 台帳を閉じて戻り先へ帰る */
+  closeLedger: () => void;
+  /** 地下へ降りる（真相到達の契機：truth-reached＋conscience+1 を同居） */
+  descendToBasement: () => void;
+  /** 地下から地上へ戻る（18b 未実装でも進行不能にしない） */
+  returnFromBasement: () => void;
+  /** 地下の進行フラグを立てる（錠解除・絵本発見）。conscience には影響しない */
+  markFlag: (flag: FlagId) => void;
   /** 性格スケッチ選択を選ぶ（無反応で要望へ合流する） */
   chooseCharacter: (choiceId: string) => void;
   /** 現在の来訪者に本を手渡す */
@@ -207,20 +223,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
   ...initial,
   guideRemark: null,
   pendingShelfQuery: null,
+  ledgerReturn: 'reception',
 
-  goTo: (screen) => {
-    if (screen === 'ledger') {
-      // 目録を開くとき、v17 完了後なら cat-final の正体を静かに開示する（開いたら変わっている）。
-      const revealed = revealCatalogFinalIfDue(
-        get().world,
-        FLAG_V17_RESOLVED,
-        FLAG_CATALOG_FINAL_REVEALED,
-      );
-      set({ screen, world: revealed });
-      return;
-    }
-    set({ screen });
+  goTo: (screen) => set({ screen }),
+
+  openLedger: (origin) => {
+    // 台帳を開くとき、v17 完了後なら cat-final の正体を静かに開示する（開いたら変わっている）。
+    const revealed = revealCatalogFinalIfDue(
+      get().world,
+      FLAG_V17_RESOLVED,
+      FLAG_CATALOG_FINAL_REVEALED,
+    );
+    set({ screen: 'ledger', world: revealed, ledgerReturn: origin });
   },
+
+  closeLedger: () => set({ screen: get().ledgerReturn }),
+
+  descendToBasement: () => {
+    // 「降りてみる」＝真相到達の契機。truth-reached＋conscience+1 を同居（初回のみ）。
+    set({ world: applyDescent(get().world, FLAG_TRUTH_REACHED), screen: 'basement' });
+  },
+
+  returnFromBasement: () => set({ screen: 'archive' }),
+
+  markFlag: (flag) => set({ world: addFlag(get().world, flag) }),
 
   chooseCharacter: (choiceId) => {
     const { world, visitorIndex } = get();
@@ -329,12 +355,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
       screen: 'reception',
       guideRemark: null,
       pendingShelfQuery: null,
+      ledgerReturn: 'reception',
     });
   },
 
   restart: () => {
     clearSave();
-    set({ ...freshRuntime(), guideRemark: null, pendingShelfQuery: null });
+    set({
+      ...freshRuntime(),
+      guideRemark: null,
+      pendingShelfQuery: null,
+      ledgerReturn: 'reception',
+    });
   },
 }));
 

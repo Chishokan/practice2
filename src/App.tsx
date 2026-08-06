@@ -5,6 +5,7 @@ import Reception from './ui/screens/Reception';
 import Shelf from './ui/screens/Shelf';
 import Archive from './ui/screens/Archive';
 import Ledger from './ui/screens/Ledger';
+import Basement from './ui/screens/Basement';
 import Closed from './ui/screens/Closed';
 import GuideRemark from './ui/components/GuideRemark';
 
@@ -19,6 +20,7 @@ export default function App() {
       {screen === 'shelf' && <Shelf />}
       {screen === 'archive' && <Archive />}
       {screen === 'ledger' && <Ledger />}
+      {screen === 'basement' && <Basement />}
       {screen === 'closed' && <Closed />}
       {screen === 'reception' && <Reception />}
       {/* 是正3（妖精の一言）は画面に依らず最前面のオーバーレイで出す */}

@@ -8,7 +8,7 @@ import CatalogPage from '../components/CatalogPage';
 // 収蔵目録は独立UIを新設せず、シグネチャ要素の台帳へ一節として寄せる（規約）。
 export default function Ledger() {
   const ledger = useGameStore((s) => s.world.ledger);
-  const goTo = useGameStore((s) => s.goTo);
+  const closeLedger = useGameStore((s) => s.closeLedger);
 
   return (
     <section className="flex flex-col gap-4 w-full max-w-xl px-6">
@@ -16,7 +16,7 @@ export default function Ledger() {
         <h1 className="text-xl text-neutral-300">貸出台帳</h1>
         <button
           type="button"
-          onClick={() => goTo('reception')}
+          onClick={closeLedger}
           className="border border-neutral-700 px-3 py-1 text-sm text-neutral-400"
         >
           閉じる
