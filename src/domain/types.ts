@@ -100,6 +100,28 @@ export interface LedgerEntry {
   note?: string;
 }
 
+/**
+ * 遊びの層（§13）＝レファレンス／ミニゲーム。来訪者に任意で付く「章ゲート」。
+ * 未解決だとその日を終えられない（可視のゲート）。答えは既読テキストの中（§13.1）。
+ * 成績・試行回数は conscience／エンド判定に一切影響させない（§13.2・型で分離）。
+ */
+export type PuzzleSpec =
+  | { kind: 'reference'; question: string; options: string[]; answer: string }
+  | { kind: 'gap'; question: string; cells: string[]; options: string[]; answer: string }
+  | { kind: 'match'; pairs: { book: string; slip: string }[] };
+
+export interface PuzzleGate {
+  /** 解決フラグ（world.flags に立つ・conscience とは別系統） */
+  flagId: FlagId;
+  /** 出題の口上（本人の声） */
+  intro: Scene[];
+  /** 段階ヒント（本人の声・2〜3段で必ず抜けられる） */
+  hints: string[];
+  /** 正解時の反応（本人の声） */
+  success: Scene[];
+  puzzle: PuzzleSpec;
+}
+
 export interface Visitor {
   id: VisitorId;
   displayName: string;
@@ -109,6 +131,8 @@ export interface Visitor {
   conditions?: VisitorCondition;
   /** 任意の性格スケッチ場面。要望の前に一度だけ提示する */
   characterScene?: CharacterScene;
+  /** 任意の遊びの層（§13）。未解決だとその日を終えられない */
+  puzzleGate?: PuzzleGate;
   scenes: Scene[];
   /** 要望に応え得る本。複数正解を許す */
   acceptableBooks: BookId[];

@@ -1,6 +1,7 @@
 import { useGameStore, VISITOR_ORDER } from '../../store/gameStore';
 import { getVisitor } from '../../content/visitors';
 import SceneView from '../components/SceneView';
+import PuzzleGate from '../components/PuzzleGate';
 import { FINAL_DAY_SCENES, CLOSE_LIBRARY_LABEL, TIDY_SHELF_LABEL } from '../../content/finale';
 
 // 受付。来訪者の要望、または手渡し後の反応を表示する。
@@ -13,6 +14,8 @@ export default function Reception() {
   const goTo = useGameStore((s) => s.goTo);
   const openLedger = useGameStore((s) => s.openLedger);
   const closeLibrary = useGameStore((s) => s.closeLibrary);
+  const markFlag = useGameStore((s) => s.markFlag);
+  const flags = useGameStore((s) => s.world.flags);
   const chooseCharacter = useGameStore((s) => s.chooseCharacter);
   const refuseCurrent = useGameStore((s) => s.refuseCurrent);
   const proceed = useGameStore((s) => s.proceed);
@@ -47,6 +50,9 @@ export default function Reception() {
   // 反応表示中でなく、性格スケッチが未回答なら、要望より先に一度だけ提示する。
   const character = visitor.characterScene;
   const showingCharacter = !showingReaction && character !== undefined && !characterAnswered;
+  // 遊びの層（§13）：この来訪者に未解決のゲートがあれば、その日を終える前に解かせる。
+  const gate = visitor.puzzleGate;
+  const gateSolved = !gate || flags.has(gate.flagId);
 
   return (
     <section className="flex flex-col gap-6 w-full max-w-xl px-6">
@@ -87,30 +93,38 @@ export default function Reception() {
         <>
           <SceneView scenes={showingReaction ? pendingScenes : visitor.scenes} />
 
-          <div className="flex gap-3">
-            {showingReaction ? (
-              <button type="button" onClick={proceed} className="border border-neutral-500 px-4 py-2">
-                次へ
-              </button>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => goTo('shelf')}
-                  className="border border-neutral-500 px-4 py-2"
-                >
-                  本を選ぶ
-                </button>
-                <button
-                  type="button"
-                  onClick={refuseCurrent}
-                  className="border border-neutral-700 px-4 py-2 text-neutral-400"
-                >
-                  お断りする
-                </button>
-              </>
-            )}
-          </div>
+          {/* 反応表示中に未解決の遊びの層があれば、その日を終える前に解かせる（可視ゲート）。 */}
+          {showingReaction && gate && !gateSolved ? (
+            <PuzzleGate gate={gate} onSolved={() => markFlag(gate.flagId)} />
+          ) : (
+            <>
+              {showingReaction && gate && gateSolved && <SceneView scenes={gate.success} />}
+              <div className="flex gap-3">
+                {showingReaction ? (
+                  <button type="button" onClick={proceed} className="border border-neutral-500 px-4 py-2">
+                    次へ
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => goTo('shelf')}
+                      className="border border-neutral-500 px-4 py-2"
+                    >
+                      本を選ぶ
+                    </button>
+                    <button
+                      type="button"
+                      onClick={refuseCurrent}
+                      className="border border-neutral-700 px-4 py-2 text-neutral-400"
+                    >
+                      お断りする
+                    </button>
+                  </>
+                )}
+              </div>
+            </>
+          )}
         </>
       )}
     </section>
