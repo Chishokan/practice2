@@ -40,6 +40,9 @@ export type Screen =
   | 'archive'
   | 'ledger'
   | 'basement'
+  | 'confront'
+  | 'naming'
+  | 'rescue'
   | 'closed';
 
 // 初期配置：先頭9冊を書架に、残り3冊を新刊の到着分として控える。
@@ -244,7 +247,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ world: applyDescent(get().world, FLAG_TRUTH_REACHED), screen: 'basement' });
   },
 
-  returnFromBasement: () => set({ screen: 'archive' }),
+  // 手記・絵本を見て地上へ戻ると、妖精が待っている（終幕・対峙へ）。
+  returnFromBasement: () => set({ screen: 'confront' }),
 
   markFlag: (flag) => set({ world: addFlag(get().world, flag) }),
 

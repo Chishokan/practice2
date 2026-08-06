@@ -78,3 +78,42 @@ export const guideFinalRemarkScenes: Scene[] = [
     text: '……いえ、私の思い違いでしょう。',
   },
 ];
+
+// 終幕・対峙（§12.7 の終着点）。妖精が初めて自分の論理を語る。厳守：
+//  - 正体・破滅・消失の機序を語らない（§12.2）。嘘は一つもつかない。
+//  - 語彙は彼女自身のものだけ（完成・きれい・傷まない・失われない・呼吸・いい司書）。
+//    intro 原文に無い語（例：静けさ）を新たに足さない。
+//  - 核心＝悪意なき不理解。「どうして」を責め口調にしない。強制しない。
+export const guideConfrontScenes: Scene[] = [
+  { id: 'guide-confront-1', speaker: GUIDE_SPEAKER, text: '……ご覧になったのですね。' },
+  {
+    id: 'guide-confront-2',
+    speaker: GUIDE_SPEAKER,
+    text: 'あそこでは、なにも傷みません。なにも、失われません。ずっと、きれいなまま。',
+  },
+  {
+    id: 'guide-confront-3',
+    speaker: GUIDE_SPEAKER,
+    text: '目録が完成すれば、この館は、呼吸を続けられます。あなたは、いい司書でいられる。',
+  },
+  {
+    id: 'guide-confront-4',
+    speaker: GUIDE_SPEAKER,
+    // 悪意なき不理解。責め口調にしない。
+    text: '……先代さんも、途中で、やめてしまわれた。どうして、みなさん。……わたしには、わからないんです。',
+  },
+  { id: 'guide-confront-5', speaker: GUIDE_SPEAKER, text: 'あなたは、どうなさいますか。' },
+];
+
+// 名前入力中、誤入力への妖精の反応（静かに待つのみ・責めない・促しすぎない）。
+export const guideNamingWaitScenes: Scene[] = [
+  { id: 'guide-naming-wait-1', speaker: GUIDE_SPEAKER, text: '……はい。' },
+];
+
+// 救済（TRUE・正名で呼ばれた瞬間）。語りは最小。理由も正体も語らない。
+export const guideRescueScenes: Scene[] = [
+  { id: 'guide-rescue-1', speaker: GUIDE_SPEAKER, text: '……ああ。……そうでした。わたし、しおり。' },
+  { id: 'guide-rescue-2', speaker: GUIDE_SPEAKER, text: '……また明日、って。言われたきりだったんです。' },
+  // TRUE の幕（一字一句この通り）。
+  { id: 'guide-rescue-3', speaker: GUIDE_SPEAKER, text: 'また、明日。' },
+];

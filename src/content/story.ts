@@ -33,6 +33,8 @@ export const CATALOG_FINAL_ID = 'cat-final';
 export const FLAG_BASEMENT_UNLOCKED: FlagId = 'basement-unlocked';
 /** 金色の絵本を手に取った（持ち出す/読む/戻すの決断は 18b） */
 export const FLAG_GOLDEN_BOOK_FOUND: FlagId = 'golden-book-found';
+/** 妖精のフォームが救済の姿へ切り替わった（正名で呼ばれた瞬間・一度だけ・§12.2） */
+export const FLAG_GUIDE_REDEEMED: FlagId = 'guide-redeemed';
 /**
  * 開示後の cat-final 行の表示題（ディレクター確定）。
  * 目録は絵本を「記述」できても「名指せ」ない——名は目録に載らない原則を目録自身に演じさせる。
@@ -61,6 +63,16 @@ export const ENDING_LABELS: Record<EndingId, string> = {
   E3: '閉架',
   E4: '継承',
   TRUE: '最初の一冊',
+};
+
+// エンド別の幕の一行（Closed 拡張）。短く・説明しない・システム通知調にしない。
+// E1 の幕のみディレクター確定（一字一句）。他は起草。
+export const ENDING_CLOSINGS: Record<EndingId, string> = {
+  E1: 'あなたは、良い司書でした。',
+  E2: '棚は、からっぽになった。だれも、なにも失わずに済んだ。……だれも、なにも受け取らないまま。',
+  E3: '目録は、閉じられた。もう、だれも借りに来ない。館は、しずかに、完成した。',
+  E4: '台帳を置いて、鍵を次の人へ渡した。いつか、だれかが、続きを読むだろう。',
+  TRUE: '目録は、未完のまま。……それでいい。',
 };
 
 // 章の幕間（静かに。大げさな演出はしない。地の文1行）。文言は仮（ディレクター承認対象）。
