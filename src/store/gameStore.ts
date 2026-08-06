@@ -6,10 +6,22 @@ import { handOver, selectReaction } from '../domain/visitor';
 import { applyChoice } from '../domain/choice';
 import { evaluateAnomalies } from '../domain/anomaly';
 import { chapterTransition } from '../domain/chapter';
+import {
+  revealCatalogFinalIfDue,
+  shouldFireGuideFinalRemark,
+  markGuideFinalRemarkFired,
+} from '../domain/catalog';
 import { allBooks } from '../content/books';
 import { allVisitors, getVisitor } from '../content/visitors';
 import { anomalyRules, TOWN_STAGES } from '../content/anomalies';
-import { ANCHOR_BOOK_ID } from '../content/story';
+import {
+  ANCHOR_BOOK_ID,
+  FLAG_V17_RESOLVED,
+  FLAG_CATALOG_FINAL_REVEALED,
+  FLAG_GUIDE_FINAL_REMARK,
+  CATALOG_FINAL_REVEAL_LABEL,
+} from '../content/story';
+import { guideFinalRemarkScenes } from '../content/guide';
 import type { SaveData, SaveDataV2 } from '../save/persistence';
 import { loadSave, writeSave, clearSave } from '../save/persistence';
 
@@ -57,6 +69,10 @@ interface GameStore {
   handedOver: boolean;
   /** この来訪で性格スケッチ選択を済ませたか（一度だけ提示する） */
   characterAnswered: boolean;
+  /** 是正3（妖精の一言）の表示シーン。null で非表示。永続しない（実行中のみ） */
+  guideRemark: Scene[] | null;
+  /** 書架を開いたときの初期検索語（金色の絵本の探索導線）。消費したら null に戻す */
+  pendingShelfQuery: string | null;
 
   goTo: (screen: Screen) => void;
   /** 性格スケッチ選択を選ぶ（無反応で要望へ合流する） */
@@ -71,6 +87,12 @@ interface GameStore {
   proceedInterlude: () => void;
   /** 整理で1冊降ろす */
   lowerFromShelf: (bookId: BookId) => void;
+  /** 目録の予約枠（金色の絵本）を探しに行く＝書架で空振り→是正3を一度だけ発火 */
+  seekCatalogFinal: () => void;
+  /** 是正3の表示を閉じる */
+  dismissGuideRemark: () => void;
+  /** 書架の初期検索語を消費する（一度使ったら消す） */
+  consumePendingShelfQuery: () => void;
   /** 次の周回を始める（erasedBooks/conscience を引き継ぐ） */
   nextCycle: () => void;
   /** すべて捨てて1周目からやり直す（セーブも消す） */
@@ -183,8 +205,22 @@ const initial = buildInitialRuntime();
 
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initial,
+  guideRemark: null,
+  pendingShelfQuery: null,
 
-  goTo: (screen) => set({ screen }),
+  goTo: (screen) => {
+    if (screen === 'ledger') {
+      // 目録を開くとき、v17 完了後なら cat-final の正体を静かに開示する（開いたら変わっている）。
+      const revealed = revealCatalogFinalIfDue(
+        get().world,
+        FLAG_V17_RESOLVED,
+        FLAG_CATALOG_FINAL_REVEALED,
+      );
+      set({ screen, world: revealed });
+      return;
+    }
+    set({ screen });
+  },
 
   chooseCharacter: (choiceId) => {
     const { world, visitorIndex } = get();
@@ -258,6 +294,27 @@ export const useGameStore = create<GameStore>((set, get) => ({
     advance(set, nextWorld, donationIndex, visitorIndex);
   },
 
+  seekCatalogFinal: () => {
+    // 金色の絵本を探す＝書架で当該語を検索（現存蔵書に無く必ず空振り）。
+    // 開示済みかつ是正3が未発火なら、空振りの直後に妖精の一言を一度だけ出す。
+    const { world } = get();
+    const fire = shouldFireGuideFinalRemark(
+      world,
+      FLAG_CATALOG_FINAL_REVEALED,
+      FLAG_GUIDE_FINAL_REMARK,
+    );
+    set({
+      screen: 'shelf',
+      pendingShelfQuery: CATALOG_FINAL_REVEAL_LABEL,
+      guideRemark: fire ? guideFinalRemarkScenes : null,
+      world: fire ? markGuideFinalRemarkFired(world, FLAG_GUIDE_FINAL_REMARK) : world,
+    });
+  },
+
+  dismissGuideRemark: () => set({ guideRemark: null }),
+
+  consumePendingShelfQuery: () => set({ pendingShelfQuery: null }),
+
   nextCycle: () => {
     // 周回跨ぎのキャリーは startNextCycle のまま（挙動不変）。保存は自動保存に任せる。
     const next = startNextCycle(get().world, CYCLE_PARAMS);
@@ -270,12 +327,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       handedOver: false,
       characterAnswered: false,
       screen: 'reception',
+      guideRemark: null,
+      pendingShelfQuery: null,
     });
   },
 
   restart: () => {
     clearSave();
-    set({ ...freshRuntime() });
+    set({ ...freshRuntime(), guideRemark: null, pendingShelfQuery: null });
   },
 }));
 

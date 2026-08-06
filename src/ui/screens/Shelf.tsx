@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { visibleShelf } from '../../domain/shelf';
 import { getBook } from '../../content/books';
@@ -9,7 +9,18 @@ export default function Shelf() {
   const world = useGameStore((s) => s.world);
   const goTo = useGameStore((s) => s.goTo);
   const handOverToCurrent = useGameStore((s) => s.handOverToCurrent);
-  const [query, setQuery] = useState('');
+  const pendingShelfQuery = useGameStore((s) => s.pendingShelfQuery);
+  const consumePendingShelfQuery = useGameStore((s) => s.consumePendingShelfQuery);
+  const [query, setQuery] = useState(pendingShelfQuery ?? '');
+
+  // 目録の「金色の絵本」導線から来た場合、その語を初期検索語として一度だけ適用する
+  // （現存蔵書に無く必ず空振り＝是正3の空振りの舞台）。適用したら消費する。
+  useEffect(() => {
+    if (pendingShelfQuery !== null) {
+      setQuery(pendingShelfQuery);
+      consumePendingShelfQuery();
+    }
+  }, [pendingShelfQuery, consumePendingShelfQuery]);
 
   const filtered = useMemo(() => {
     // 綻び：searchBlock で隠れた本は visibleShelf が静かに外す。システムメッセージは出さない。

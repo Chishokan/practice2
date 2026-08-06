@@ -18,6 +18,21 @@ export const FLAG_TRUTH_REACHED: FlagId = 'truth-reached';
 export const FLAG_CHOSE_CLOSE: FlagId = 'chose-close';
 export const FLAG_CHOSE_BEQUEATH: FlagId = 'chose-bequeath';
 
+// child 再訪（v17）の解決フラグ。cat-final 開示の前提（v17 完了後に開示する）。
+export const FLAG_V17_RESOLVED: FlagId = 'v17-child-return-resolved';
+// 収蔵目録の予約枠（cat-final）の正体開示フラグ。v17 完了後、次に目録を開いたとき立つ。
+export const FLAG_CATALOG_FINAL_REVEALED: FlagId = 'catalog-final-revealed';
+// 是正3（妖精の「……見つかりませんでしたか」）を一度だけにするためのフラグ。
+export const FLAG_GUIDE_FINAL_REMARK: FlagId = 'guide-final-remark-shown';
+
+/** 予約枠のエントリ id（開示対象の特定に使う） */
+export const CATALOG_FINAL_ID = 'cat-final';
+/**
+ * 開示後の cat-final 行の表示題（ディレクター確定）。
+ * 目録は絵本を「記述」できても「名指せ」ない——名は目録に載らない原則を目録自身に演じさせる。
+ */
+export const CATALOG_FINAL_REVEAL_LABEL = '金色の絵本（題不詳）';
+
 /** E1「良き司書」に至る手渡し数の目安（全来訪者を満足させた水準） */
 export const GOOD_LIBRARIAN_HANDOVERS = 3;
 

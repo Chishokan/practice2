@@ -6,6 +6,7 @@ import Shelf from './ui/screens/Shelf';
 import Archive from './ui/screens/Archive';
 import Ledger from './ui/screens/Ledger';
 import Closed from './ui/screens/Closed';
+import GuideRemark from './ui/components/GuideRemark';
 
 // 画面の出し分け。Phase 1 のコアループ（受付→書架→反応→整理）を通す。
 export default function App() {
@@ -20,6 +21,8 @@ export default function App() {
       {screen === 'ledger' && <Ledger />}
       {screen === 'closed' && <Closed />}
       {screen === 'reception' && <Reception />}
+      {/* 是正3（妖精の一言）は画面に依らず最前面のオーバーレイで出す */}
+      <GuideRemark />
     </main>
   );
 }
