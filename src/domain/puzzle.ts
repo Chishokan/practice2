@@ -26,5 +26,6 @@ export function isPairMatch(spec: PuzzleSpec, bookIndex: number, slipIndex: numb
 export function isPuzzleSolvable(spec: PuzzleSpec): boolean {
   if (spec.kind === 'reference') return spec.options.includes(spec.answer);
   if (spec.kind === 'gap') return spec.options.includes(spec.answer);
-  return spec.pairs.length > 0;
+  if (spec.kind === 'match') return spec.pairs.length > 0;
+  return true; // rpg：はなす＝必勝（詳細は domain/rpg.ts）
 }

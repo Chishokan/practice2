@@ -50,7 +50,7 @@ describe('ミニゲームの成績はエンド判定に影響しない（§13.2�
   it('パズル解決フラグを足しても determineEnding は変わらない', () => {
     const base = createInitialWorldState({ shelf: ['anchor'], shelfCapacity: 1 });
     const before = determineEnding(base, cfg);
-    const withPuzzle = { ...base, flags: new Set(['v02-sailor-puzzle', 'v09-clerk-puzzle']) };
+    const withPuzzle = { ...base, flags: new Set(['v02-sailor-puzzle', 'v09-clerk-puzzle', 'v17-child-rpg']) };
     expect(determineEnding(withPuzzle, cfg)).toBe(before);
   });
 });

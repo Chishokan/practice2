@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import type { PuzzleGate as PuzzleGateData, PuzzleSpec } from '../../domain/types';
 import { isChoiceCorrect, isMatchComplete } from '../../domain/puzzle';
+import { rpgStep, RPG_INITIAL, RPG_MAX_HP, type RpgCommand } from '../../domain/rpg';
+import { useGameStore } from '../../store/gameStore';
 import SceneView from './SceneView';
 
 // 遊びの層（§13）のゲート表示。出題の口上→ミニゲーム→（誤答で本人の声のヒント）。
@@ -21,6 +23,7 @@ export default function PuzzleGate({ gate, onSolved }: { gate: PuzzleGateData; o
 
 function Puzzle({ spec, onSolved, onWrong }: { spec: PuzzleSpec; onSolved: () => void; onWrong: () => void }) {
   if (spec.kind === 'match') return <MatchPuzzle spec={spec} onSolved={onSolved} onWrong={onWrong} />;
+  if (spec.kind === 'rpg') return <RpgPuzzle spec={spec} onSolved={onSolved} />;
 
   // reference / gap：選択式。正解で解決、誤答でヒントを一段進める。
   const question = spec.question;
@@ -124,6 +127,77 @@ function MatchPuzzle({
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+// 読み聞かせRPG⑧：b02『竜と鍛冶屋』。勝ち筋＝はなす（正史の友情）。たたかう連打でも詰まない。
+// 在（b02が書架にある）＝一緒に読む（地の文寄り）／不在（降ろし済み）＝child が GM（語り寄り）。
+// 進行・正誤・再挑戦はすべて child の声（＋最小の地の文）。システム通知調ゼロ。
+function RpgPuzzle({ spec, onSolved }: { spec: Extract<PuzzleSpec, { kind: 'rpg' }>; onSolved: () => void }) {
+  const erasedBooks = useGameStore((s) => s.world.erasedBooks);
+  const read = !erasedBooks.includes(spec.bookId); // 在＝読む／不在＝語り（GM）
+
+  const opening = read
+    ? '（本を開くと、山の上の竜が、鍛冶屋を見下ろしている。）'
+    : 'はい、しょうぶ! やまのうえに、りゅうがいるよ。たたかう? まもる? はなす?';
+  const msg = (kind: 'fight' | 'guard' | 'win' | 'lose') => {
+    const table = {
+      read: {
+        fight: '（鍛冶屋は槌を構えた。）「ちがうよ! りゅうはね、わるいりゅうじゃないんだよ!」',
+        guard: '（鍛冶屋は身をかまえた。）「そう、まもって……そのあいだに、はなしかけてみて!」',
+        win: '（鍛冶屋は槌を置いて、竜に話しかけた。）「そう! それでね、りゅうとね、ともだちになるの!」',
+        lose: '「あーあ、まけちゃった! ……いいの、もういっかい! さいしょから、よもう!」',
+      },
+      recite: {
+        fight: '「たたかう? ……でもね、りゅうはおこってないよ。ちがうちがう!」',
+        guard: '「まもる! ……そのあいだに、はなしかけるんだよ!」',
+        win: '「はなす! ……そうだよ! りゅうとね、ともだちになるんだ。さいごは、ずっと、なかよし!」',
+        lose: '「あーあ、まけちゃった! もういっかい、さいしょから!」',
+      },
+    };
+    return table[read ? 'read' : 'recite'][kind];
+  };
+
+  const [state, setState] = useState(RPG_INITIAL);
+  const [line, setLine] = useState(opening);
+  const [won, setWon] = useState(false);
+
+  const act = (cmd: RpgCommand) => {
+    const r = rpgStep(state, cmd);
+    if (r.outcome === 'win') {
+      setLine(msg('win'));
+      setWon(true);
+    } else if (r.outcome === 'lose') {
+      setState(r.state);
+      setLine(msg('lose'));
+    } else {
+      setState(r.state);
+      setLine(msg(cmd === 'fight' ? 'fight' : 'guard'));
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-sm text-neutral-500">鍛冶屋 {'♥'.repeat(state.smithHp)}{'♡'.repeat(RPG_MAX_HP - state.smithHp)}</p>
+      <p className="leading-relaxed text-neutral-300">{line}</p>
+      {won ? (
+        <button type="button" onClick={onSolved} className="self-start border border-neutral-500 px-4 py-2 text-neutral-100">
+          よめた!
+        </button>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => act('fight')} className="border border-neutral-600 px-4 py-2 text-neutral-200">
+            たたかう
+          </button>
+          <button type="button" onClick={() => act('guard')} className="border border-neutral-600 px-4 py-2 text-neutral-200">
+            まもる
+          </button>
+          <button type="button" onClick={() => act('talk')} className="border border-neutral-600 px-4 py-2 text-neutral-200">
+            はなす
+          </button>
+        </div>
+      )}
     </div>
   );
 }

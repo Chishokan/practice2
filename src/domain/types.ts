@@ -108,7 +108,8 @@ export interface LedgerEntry {
 export type PuzzleSpec =
   | { kind: 'reference'; question: string; options: string[]; answer: string }
   | { kind: 'gap'; question: string; cells: string[]; options: string[]; answer: string }
-  | { kind: 'match'; pairs: { book: string; slip: string }[] };
+  | { kind: 'match'; pairs: { book: string; slip: string }[] }
+  | { kind: 'rpg'; bookId: BookId };
 
 export interface PuzzleGate {
   /** 解決フラグ（world.flags に立つ・conscience とは別系統） */
