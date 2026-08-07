@@ -33,6 +33,7 @@ import { loadSave, writeSave, clearSave } from '../save/persistence';
 
 /** 表示中の画面。'intro'=着任時の案内役、'interlude'=章の幕間、'closed'=周回の終端 */
 export type Screen =
+  | 'title'
   | 'intro'
   | 'interlude'
   | 'reception'
@@ -82,8 +83,12 @@ interface GameStore {
   pendingShelfQuery: string | null;
   /** 台帳を閉じたときの戻り先（受付／地下の錠から見に来た場合など）。永続しない */
   ledgerReturn: Screen;
+  /** タイトルの「つづきから」で戻る先（起動時に読み込んだ画面）。永続しない */
+  resumeScreen: Screen;
 
   goTo: (screen: Screen) => void;
+  /** タイトル→本編（つづきから＝復元画面へ、新規＝intro へ） */
+  continueGame: () => void;
   /** 台帳（目録）を開く。戻り先を覚えつつ、必要なら cat-final を開示する */
   openLedger: (origin: Screen) => void;
   /** 台帳を閉じて戻り先へ帰る */
@@ -226,11 +231,16 @@ const initial = buildInitialRuntime();
 
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initial,
+  // 起動時は必ずタイトルから。復元画面は resumeScreen に控え、「つづきから」で戻る。
+  screen: 'title',
+  resumeScreen: initial.screen,
   guideRemark: null,
   pendingShelfQuery: null,
   ledgerReturn: 'reception',
 
   goTo: (screen) => set({ screen }),
+
+  continueGame: () => set({ screen: get().resumeScreen }),
 
   openLedger: (origin) => {
     // 台帳を開くとき、v17 完了後なら cat-final の正体を静かに開示する（開いたら変わっている）。
@@ -380,7 +390,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
 // 実行状態が変わるたびに自動保存する。
 // これにより conscience を含む途中状態が、周回途中のリロードでも失われない。
-useGameStore.subscribe((s) => writeSave(toSnapshot(s)));
+// ただしタイトル表示中は保存しない（'title' で上書きすると復元先が消えるため）。
+useGameStore.subscribe((s) => {
+  if (s.screen !== 'title') writeSave(toSnapshot(s));
+});
 
 // 次の来訪者へ進む。章が上がるなら幕間、来訪者が尽きたら閉館（エンディングへ）。
 function advance(

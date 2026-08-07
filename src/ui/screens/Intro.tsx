@@ -1,6 +1,7 @@
 import { useGameStore } from '../../store/gameStore';
 import { guideIntroScenes } from '../../content/guide';
 import SceneView from '../components/SceneView';
+import GuideForm from '../components/GuideForm';
 
 // 着任時の案内役（妖精）登場＋大義提示。ゲーム開始時に一度だけ表示する。
 // 画像は Phase 6。ここでは基本形の妖精をテキストで登場させるのみ。
@@ -9,6 +10,7 @@ export default function Intro() {
 
   return (
     <section className="flex flex-col gap-6 w-full max-w-xl px-6">
+      <GuideForm className="h-28 w-28 self-center object-contain" />
       <SceneView scenes={guideIntroScenes} />
       <div>
         <button

@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { matchesGuideName } from '../../domain/naming';
 import SceneView from '../components/SceneView';
+import GuideForm from '../components/GuideForm';
 import { guideConfrontScenes, guideNamingWaitScenes } from '../../content/guide';
-import { NAMING_PROMPT, NAMING_PLACEHOLDER, NAMING_SUBMIT, NAMING_CANCEL, GUIDE_FORM_BASE } from '../../content/finale';
+import { NAMING_PROMPT, NAMING_PLACEHOLDER, NAMING_SUBMIT, NAMING_CANCEL } from '../../content/finale';
 import { FLAG_GUIDE_REDEEMED } from '../../content/story';
 
 // 名前入力＝最後のレファレンス。正解「しおり」は手記由来のみ（ここには出さない）。
@@ -27,7 +28,7 @@ export default function Naming() {
 
   return (
     <section className="flex w-full max-w-xl flex-col gap-6 px-6">
-      <p className="text-xs text-neutral-600">{GUIDE_FORM_BASE}</p>
+      <GuideForm />
       {/* 対峙の余韻を薄く残す（強ヒントは出さない） */}
       <SceneView scenes={guideConfrontScenes.slice(-1)} />
       <p className="text-neutral-300">{NAMING_PROMPT}</p>

@@ -1,5 +1,6 @@
 import { useGameStore } from '../../store/gameStore';
 import SceneView from './SceneView';
+import GuideForm from './GuideForm';
 
 // 是正3（妖精の一言）の最小オーバーレイ。台詞と間のみ。システム通知や注釈は足さない。
 // フォームは出さない（道中は基本形で不変・§12.2）。閉じると静かに消える。
@@ -11,6 +12,7 @@ export default function GuideRemark() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/80 px-6">
       <div className="flex max-w-md flex-col gap-6">
+        <GuideForm className="h-20 w-20 self-center object-contain" />
         <SceneView scenes={guideRemark} />
         <button
           type="button"

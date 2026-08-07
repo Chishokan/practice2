@@ -1,7 +1,8 @@
 import { useGameStore } from '../../store/gameStore';
 import SceneView from '../components/SceneView';
+import GuideForm from '../components/GuideForm';
 import { guideConfrontScenes } from '../../content/guide';
-import { GUIDE_FORM_BASE, CONFRONT_CHOICE_COMPLETE, CONFRONT_CHOICE_BEQUEATH, CONFRONT_CHOICE_NAME } from '../../content/finale';
+import { CONFRONT_CHOICE_COMPLETE, CONFRONT_CHOICE_BEQUEATH, CONFRONT_CHOICE_NAME } from '../../content/finale';
 import {
   FLAG_TRUTH_REACHED,
   FLAG_CHOSE_CLOSE,
@@ -34,7 +35,7 @@ export default function Confront() {
 
   return (
     <section className="flex w-full max-w-xl flex-col gap-6 px-6">
-      <p className="text-xs text-neutral-600">{GUIDE_FORM_BASE}</p>
+      <GuideForm />
       <SceneView scenes={guideConfrontScenes} />
       <div className="flex flex-col gap-2">
         <button type="button" onClick={complete} className="border border-neutral-700 px-4 py-2 text-left text-neutral-200">

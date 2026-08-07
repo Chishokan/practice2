@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 背景の基準色（背景画像が未配置でも従来の無地が保たれる）。 */
+html,
+body {
+  background-color: #171717; /* neutral-900 */
+}
+
+/*
+ * 救済（redeemed）の差し色トークン。--erasure（消失の紫）とは実装上分離する
+ * （ディレクター裁定）。消失の紫ではなく「戻ってくる淡い色」＝restoration。
+ * 現状フォームは画像で表現するため未使用でよいが、将来のUI差し色用に定義しておく。
+ */
+:root {
+  --restoration: #d7cfe6; /* ごく淡い菫がかった生成り（癒えの色・彩度低め） */
+}

@@ -18,6 +18,7 @@ import {
   BASEMENT_OUTRO,
 } from '../../content/basement';
 import SceneView from '../components/SceneView';
+import Asset from '../components/Asset';
 
 // 地下書庫（beat 18a）。錠（⑦）→保存庫→金色の絵本→先代の手記→気配→地上復帰。
 // 妖精はこの画面に登場しない・台詞ゼロ（道中台詞は是正3のみの規約）。18b には着手しない。
@@ -162,6 +163,7 @@ function Explore({
 
       {step === 1 && (
         <>
+          <Asset src="/assets/cg/golden-book.webp" alt="" className="max-h-[45vh] w-full rounded object-cover" />
           <SceneView scenes={GOLDEN_BOOK_SCENES} />
           <button type="button" onClick={() => setStep(2)} className="self-start border border-neutral-600 px-4 py-2 text-neutral-300">
             傍らの手記を開く

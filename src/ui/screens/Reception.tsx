@@ -2,6 +2,8 @@ import { useGameStore, VISITOR_ORDER } from '../../store/gameStore';
 import { getVisitor } from '../../content/visitors';
 import SceneView from '../components/SceneView';
 import PuzzleGate from '../components/PuzzleGate';
+import Asset from '../components/Asset';
+import { portraitId } from '../../domain/assets';
 import { FINAL_DAY_SCENES, CLOSE_LIBRARY_LABEL, TIDY_SHELF_LABEL } from '../../content/finale';
 
 // 受付。来訪者の要望、または手渡し後の反応を表示する。
@@ -62,7 +64,15 @@ export default function Reception() {
       </p>
 
       <div className="flex items-center justify-between">
-        <h1 className="text-xl text-neutral-300">{visitor.displayName}</h1>
+        <div className="flex items-center gap-3">
+          {/* 立ち絵（未配置なら消えてテキストのみ・1人1枚固定・再訪は同一絵） */}
+          <Asset
+            src={`/assets/visitors/${portraitId(visitor.id)}.webp`}
+            alt=""
+            className="h-16 w-16 rounded object-cover"
+          />
+          <h1 className="text-xl text-neutral-300">{visitor.displayName}</h1>
+        </div>
         <button
           type="button"
           onClick={() => openLedger('reception')}
