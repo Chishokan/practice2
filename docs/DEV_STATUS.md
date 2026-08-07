@@ -33,7 +33,7 @@
 | 5 | ビジュアル（カラートークン・台帳UI作り込み・立ち絵/背景・妖精フォーム） | ⬜ 後ろ倒し。**「プロンプトD」として第3章完成・遊びの層の後に実施**（制作順序＝絵は最後の原則どおり） |
 | 6 | 第2・3章 | ✅ **第3章 完了（物語・終幕・導線まで）**。第2章6人＋来訪者13〜17＋機構ビート＋18a/18b＋**最終閉館日ビート（終幕導線）配線済（Ch3-F）**。**本編ループの足で全5エンド（E1/E2/E3/E4/TRUE）到達を実機確認**（シード注入なし）。visitorAmnesia は scripted 継続 |
 | **7（新設）** | **遊びの層（レファレンス＋ミニゲーム）** | ✅ **完了（7a＋7b）**：puzzleGate 章ゲート機構／①題名(ch1 sailor)／⑤照合(ch2 clerk)／②目録欠番(ch2 antiquarian)／**⑧読み聞かせRPG(ch3 child・b02・両分岐)**。終幕 ⑦錠＋名前入力は 18a/18b で実装済 |
-| 8 | ビジュアル仕上げ（プロンプトD）→ 配布（Cloudflare Pages・OGP・実機確認・公開） | 🟡 **D1（仕様）＋D3（組み込み）実装済**：タイトル画面／立ち絵スロット／妖精2フォーム／背景＋差分／CG2点を fallback 三態対応で組み込み。残：**D2＝ユーザーが実画像を `public/assets/` へ配置**（README 参照）／配布（Phase8） |
+| 8 | ビジュアル（D）→ 配布 | 🟡 **D1＋D3＋Phase8 準備 実装済**：タイトル／立ち絵スロット／妖精2形／背景差分／CG（fallback三態）＋OGP・favicon・SPA設定・`docs/DEPLOY.md`・`docs/RELEASE_CHECKLIST.md`。残：**ユーザー作業**＝D2 画像配置（任意）／AI画像の規約確認／Cloudflare 接続・公開 |
 
 > **工程順の注記：** GAME_DESIGN §10 の原番号ではビジュアル＝Phase5・配布＝Phase7 だが、実運用では
 > 「絵は最後」の制作順序（§7）に従いビジュアルを後ろ倒し（プロンプトD）にし、その手前に**遊びの層（新設 Phase7）**を差し込む。
@@ -337,6 +337,16 @@ Phase6 時点の注記（機構の実装のみ：章進行・幕間UI・目録�
 - **fallback（`Asset` の onError）：** 画像なし／一部配置／全配置の**三態いずれでも進行・表示が破綻しない**（未配置は画像が消えるだけ・レイアウト維持）。遅延読込（`loading="lazy"`）。ルール・テキスト・エンド判定・セーブは不変。
 - 実画像は未コミット（`public/assets/README.md` に配置先を明記＝D2 でユーザーが配置）。
 - テスト 94→101（`assets.test.ts` 7件：portraitId 再訪マップ・guideForm・backgroundKey）。実機：三態で E1/TRUE 通し（フォーム切替・西日・晴天・CG2点）・スマホ幅・タイトル→つづきからのリロード保持。
+
+### 10.1n 配布準備（Phase8）
+
+- **portraitId 再訪マップ突合（実ロースター）：** v07→v01(baker)／v13→v05(teacher)／v14→v02(sailor)／v15→v10(antiquarian)／v16→v11(musician)／**v17→v03(child＝星を見る子ども。tinker は v04 で別)** ＝全て正（取り違えなし・修正不要）。
+- **OGP/メタ（`index.html`）：** og:title/description（紹介文一字一句）・twitter:summary_large_image・description・favicon（栞紐モチーフ SVG）。og:image は文字のみフォールバック `/og.svg`（常在・ネタバレなし）。**ネタバレ語（消える／妖精の名／エンド構成／隠し機構）はメタ・文面に一切なし。** ジャンルは控えめ。
+- **Cloudflare Pages：** SPA `public/_redirects`（`/* /index.html 200`）同梱。`docs/DEPLOY.md`＝ビルド設定（Vite / `npm run build` / `dist` / 環境変数不要）・Private 接続手順・独自ドメイン・OGP注記・プロジェクト名提案 `kashidashi-mikka`。**アカウント操作はユーザー作業。**
+- **`docs/RELEASE_CHECKLIST.md`：** 画像配置（未配置でも公開可）・AI画像の規約確認（ユーザー）・スマホ/主要ブラウザ/セーブ/OGP 確認・クレジット（個人情報不可）。
+- スモーク：`npm run build`→`npm run preview`（本番ビルド・4173）でタイトル→E1/TRUE/E3/E4 通し破綻なし（fallback 状態）。テスト 101 緑。
+
+**残：ユーザー作業のみ（D2 画像配置＝任意／AI画像の規約確認／Cloudflare 接続・公開・実機とOGPの最終確認）。コード実装は完了。**
 
 ### 10.1c 遊びの層（Phase7 新設）の執筆時の申し送り
 

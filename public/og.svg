@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" font-family="serif">
+  <rect width="1200" height="630" fill="#171717"/>
+  <rect x="40" y="40" width="1120" height="550" rx="10" fill="none" stroke="#4a453d" stroke-width="2"/>
+  <!-- 本＋栞紐 -->
+  <g transform="translate(120,215)">
+    <rect x="0" y="0" width="140" height="200" rx="4" fill="#3f3a33" stroke="#8a8175" stroke-width="2"/>
+    <path d="M104 0 v150 l-18 -18 l-18 18 V0" fill="#b9a97e"/>
+  </g>
+  <text x="330" y="300" fill="#e5e5e5" font-size="76" letter-spacing="8">貸出は三日まで</text>
+  <text x="330" y="370" fill="#a3a3a3" font-size="30">小さな港街の図書館に、あなたは司書として着任する。</text>
+  <text x="330" y="412" fill="#a3a3a3" font-size="30">本を貸して、返してもらって、棚を整えて。</text>
+  <text x="330" y="454" fill="#8a8175" font-size="26">……ただ、それだけの、静かな仕事です。</text>
+</svg>
