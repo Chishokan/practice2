@@ -1,6 +1,6 @@
 # 配布手順（Cloudflare Pages）
 
-`貸出は三日まで` を Cloudflare Pages で公開するための手順書。
+`返した本を、誰も覚えていない` を Cloudflare Pages で公開するための手順書。
 **アカウント操作（Cloudflare へのログイン・接続・公開）はユーザー作業。** Claude Code 側の担当は
 設定ファイル（`public/_redirects`・OGP メタ・favicon）と本手順書まで。
 
@@ -15,7 +15,7 @@
 | Node version | 18 以上（`NODE_VERSION=20` を環境変数に入れると安定） |
 | 環境変数 | **不要**（localStorage セーブのみ・外部APIなし） |
 
-- **プロジェクト名の提案：** `kashidashi-mikka`（＝ `kashidashi-mikka.pages.dev`。ユーザーが変更可）。
+- **プロジェクト名の提案：** `kaeshita-hon`（＝ `kaeshita-hon.pages.dev`。ユーザーが変更可）。
 - SPA ルーティング：`public/_redirects`（`/* /index.html 200`）を同梱済み。単一ページ構成のため通常不要だが、直リンク時の 404 を防ぐ保険。
 
 ## 2. Private リポジトリのまま接続する手順（ユーザー作業）
